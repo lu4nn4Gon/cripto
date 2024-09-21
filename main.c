@@ -4,29 +4,31 @@
 
 
 int main(void) {
-    char nome[30];
-    char cpf[12];
+    char cpf[13];
+    char senha[11];
 
     // abre o arquivo chamado usuarios.txt para adição de novo conteúdo
     FILE *usuarios = fopen("usuarios.txt", "a");
 
-    printf("Digite seu nome: ");
-    fgets(nome, 30 , stdin);
-    nome[strlen(nome) - 1] = '\0';
-
     printf("Digite seu CPF (apenas números, sem pontos ou traços): ");
-    fgets(cpf, 11 , stdin);
+    fgets(cpf, 13 , stdin);
+    cpf[strcspn(cpf, "\n")] = '\0';
 
-    // grava no arquivo usuarios.txt
-    fprintf(usuarios, "%s - %s\n", nome, cpf);
+    printf("Digite sua Senha: ");
+    fgets(senha, 11 , stdin);
+    senha[strcspn(senha, "\n")] = '\0';
+
+
+    if (senha[0] == '\0'){
+        printf("Campo Senha vazio");
+    } else if (cpf[0] == '\0') {
+        printf("Campo CPF vazio");
+    } else {
+        // grava no arquivo usuarios.txt
+        fprintf(usuarios, "%s - %s\n", cpf, senha);
+    }
 
     fclose(usuarios);
-
-    printf("\nNome: %s - ", nome);
-    printf("CPF: %s\n", cpf);
-
-
-
 
     return 0;
 }
