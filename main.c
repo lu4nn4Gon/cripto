@@ -2,50 +2,71 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *ValidaIgualdade(char* stringOne, char* stringTwo){
+
+int ValidaIgualdade(char* stringOne, char* stringTwo){
     int i = 0;
 
     while(stringOne[i] != '\0' && stringTwo[i] != '\0'){
-    
+
         if (stringOne[i] != stringTwo[i]) {
-            return "Diferentes";
+            return 0;
         } i++;
     }
-   return "Iguais"; 
+   return 1; 
     
 }
 
-// char Login(char cpf, char senha){
-//     FILE *usuarios;
-//     char linha[t];
-//     char cpf[12], senha[5];
+char* Login(char* cpfDigitado, char* senhaDigitada){
+    FILE *usuarios;
+    int t = 256;
+    char linha[t];
+    char cpf[12];
+    char senha[5];
 
-// }
+    usuarios = fopen("usuarios.txt", "r");
+    while (fgets(linha, t, usuarios) != NULL) {
+        
+        int c = 0;
+        int s = 0;
+
+        while (linha[c] != '-') {
+            cpf[c] = linha[c]; 
+            c++;
+        }
+        cpf[c] = '\0'; 
+
+        c++;
+
+        while (linha[c] != '\0') {
+            senha[s] = linha[c];
+            c++;
+            s++;
+        }
+        senha[s] = '\0';
+
+        if (ValidaIgualdade(cpf, cpfDigitado) && ValidaIgualdade(senha, senhaDigitada)) {
+            fclose(usuarios);
+            return "Tem"; 
+        }
+    }
+
+    fclose(usuarios);
+    return "Nao tem"; 
+}
+
+
 
 
 int main(void) {
-    // FILE *usuarios;
-    // int t = 256;
-    // char linha[t];
-    // // ler o arquivo txt
-    // usuarios = fopen("usuarios.txt", "r");
-    // while (!feof(usuarios)){
-    //    if (fgets(linha, t, usuarios) != NULL) {
-    //         printf("%s", linha);
-    //     }
-    // }
-    // fgets(linha, t, usuarios);
-    // fclose(usuarios);
+    char cpfDigitado[12];
+    char senhaDigitada[5];
 
-    char stringOne[20];
-    char stringTwo[20];
+    printf("Digite o CPF: ");
+    scanf("%11s", cpfDigitado);  
+    printf("Digite a senha: ");
+    scanf("%5s", senhaDigitada); 
 
-    printf("Digite a primeira frase: ");
-    scanf("%s", stringOne);
-    printf("Digite a segunda frase: ");
-    scanf("%s", stringTwo);
-
-    const char* resultado = ValidaIgualdade(stringOne, stringTwo);
+    const char* resultado = Login(cpfDigitado, senhaDigitada);
     printf("%s\n", resultado);
 
     return 0;
