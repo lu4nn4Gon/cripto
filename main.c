@@ -3,6 +3,41 @@
 #include <string.h>
 #include <time.h>
 
+float StringViraNumero(char* string) {
+    float resultado = 0.0;
+    float fator = 1.0;
+    int i = 0;
+    int decimal = 0; 
+
+    if (string[0] == '-' || string[0] == '+') {
+        i++;
+    }
+
+    while (string[i] != '\0') {
+        if (string[i] == '.') {
+            decimal = 1; 
+            i++;
+            continue;
+        }
+
+        if (decimal) {
+            fator = fator * 0.10;
+            resultado = resultado + (string[i] - '0') * fator;
+        } else {
+            resultado = resultado * 10 + (string[i] - '0');
+        }
+
+        i++;
+    }
+
+    if (string[0] == '-') {
+        resultado = -resultado;
+    }
+
+    return resultado;
+}
+
+
 
 float ValidaIgualdade(char* stringOne, char* stringTwo){
     int i = 0;
@@ -67,7 +102,7 @@ float VerificaSaldo(char* cpfDigitado) {
             
             valor[v] = '\0';
     
-            float valor_numero = strtof(valor, NULL);
+            float valor_numero = StringViraNumero(valor);
    
             saldo = saldo + valor_numero;
         }
@@ -77,6 +112,32 @@ float VerificaSaldo(char* cpfDigitado) {
 
     return saldo;
 }
+
+int Sacar(float valorSaque, char*senhaDigitada, char* cpfDigitado){
+    FILE *extrato;
+    int saldo = VerificaSaldo(cpfDigitado);
+
+    if (saldo >= valorSaque) {
+        extrato = fopen("extrato.txt", "a");
+
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+
+        fprintf(extrato, "%s|-%.2f;%02d/%02d/%d|%02d:%02d:%02d\n", cpfDigitado, valorSaque,
+            tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,
+            tm.tm_hour, tm.tm_min, tm.tm_sec);
+        
+        fclose(extrato);
+
+        printf("Saque de %.2f realizado com sucesso.\n", valorSaque);
+        return 1; 
+    } else {
+        printf("Saldo insuficiente.\n");
+        return 0; 
+    }
+}
+
+    
 
 
 int Login(char* cpfDigitado, char* senhaDigitada){
@@ -124,8 +185,10 @@ int Login(char* cpfDigitado, char* senhaDigitada){
 int main(void) {
     char cpfDigitado[12];
     char senhaDigitada[5];
+    char senhaVerificacao[5];
     float valorDeposito;
     float valorSaque;
+    char senha[5];
     float saldo;
 
     printf("Digite o CPF: ");
@@ -137,7 +200,7 @@ int main(void) {
     
     
     if(logado == 1){
-        printf("Login inválido\n");
+        printf("Login invalido\n");
     } else {
         int opcao;
         printf("Menu\n");
@@ -154,8 +217,8 @@ int main(void) {
 
         switch(opcao) {
             case 1: 
-                saldo = VerificaSaldo(cpfDigitado);
-                printf("Seu saldo atual é: %.2f\n", saldo);
+                saldo = VerificaSaldo(cpfDigitado); 
+                printf("Seu saldo atual e: %.2f\n", saldo);
                 break;
             case 2: 
                 printf("Consultar extrato...");
@@ -169,7 +232,15 @@ int main(void) {
                 printf("Valor depositado!\n");
                 break;
             case 4: 
-                printf("Fazer funcao para sacar");
+                printf("Digite o valor que deseja sacar em Reais: ");
+                scanf("%f", &valorSaque);
+                printf("Digite sua Senha: ");
+                scanf("%5s", senhaVerificacao); 
+                if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1){
+                    Sacar(valorSaque, senhaDigitada, cpfDigitado);
+                } else {
+                    printf("Senha incorreta\n");
+                }
                 break;
             case 5: 
                 printf("Comprar criptomoedas...");
