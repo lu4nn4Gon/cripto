@@ -1,7 +1,31 @@
 # include <stdio.h> 
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
+
+char Depositar(int valorDeposito, char* cpfDigitado){
+    FILE *extrato;
+    int tamanho = 100000;
+    char linha[tamanho];
+
+    extrato = fopen("extrato.txt", "a");
+
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+
+     fprintf(extrato, "[%s]+%d-%02d/%02d/%d-%02d:%02d:%02d\n",cpfDigitado, valorDeposito,
+            tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,  
+            tm.tm_hour, tm.tm_min, tm.tm_sec);             
+
+    fclose(extrato);
+    return 0;
+}
+
+// char Sacar(int valorSaque, char* cpfDigitado, char*senhaDigitada){
+//     FILE *extrato;
+//     int 
+// }
 
 int ValidaIgualdade(char* stringOne, char* stringTwo){
     int i = 0;
@@ -60,6 +84,7 @@ int Login(char* cpfDigitado, char* senhaDigitada){
 int main(void) {
     char cpfDigitado[12];
     char senhaDigitada[5];
+    int valorDeposito;
 
     printf("Digite o CPF: ");
     scanf("%11s", cpfDigitado);  
@@ -92,7 +117,12 @@ int main(void) {
                 printf("Consultar extrato...");
                 break;
             case 3: 
-                printf("Depositar...");
+                printf("Digite o valor que deseja depositar em Reais: ");
+                scanf("%d", &valorDeposito);
+                if(valorDeposito > 0){
+                Depositar(valorDeposito, cpfDigitado);
+                }
+                printf("Valor depositado!\n");
                 break;
             case 4: 
                 printf("Sacar...");
