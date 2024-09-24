@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 
+//essa funcao
 float StringViraNumero(char* string) {
     float resultado = 0.0;
     float fator = 1.0;
