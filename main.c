@@ -4,30 +4,7 @@
 #include <time.h>
 
 
-char Depositar(int valorDeposito, char* cpfDigitado){
-    FILE *extrato;
-    int tamanho = 100000;
-    char linha[tamanho];
-
-    extrato = fopen("extrato.txt", "a");
-
-    time_t t = time(NULL);
-    struct tm tm = *localtime(&t);
-
-     fprintf(extrato, "[%s]+%d-%02d/%02d/%d-%02d:%02d:%02d\n",cpfDigitado, valorDeposito,
-            tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,  
-            tm.tm_hour, tm.tm_min, tm.tm_sec);             
-
-    fclose(extrato);
-    return 0;
-}
-
-// char Sacar(int valorSaque, char* cpfDigitado, char*senhaDigitada){
-//     FILE *extrato;
-//     int 
-// }
-
-int ValidaIgualdade(char* stringOne, char* stringTwo){
+float ValidaIgualdade(char* stringOne, char* stringTwo){
     int i = 0;
 
     while(stringOne[i] != '\0' && stringTwo[i] != '\0'){
@@ -40,12 +17,75 @@ int ValidaIgualdade(char* stringOne, char* stringTwo){
     
 }
 
+
+char Depositar(float valorDeposito, char* cpfDigitado){
+    FILE *extrato;
+    int tamanho = 100000;
+    char linha[tamanho];
+
+    extrato = fopen("extrato.txt", "a");
+
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+
+     fprintf(extrato, "%s|+%.2f;%02d/%02d/%d|%02d:%02d:%02d\n",cpfDigitado, valorDeposito,
+            tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,  
+            tm.tm_hour, tm.tm_min, tm.tm_sec);             
+
+    fclose(extrato);
+    return 0;
+}
+
+float VerificaSaldo(char* cpfDigitado) {
+    FILE *extrato;
+    int tamanho = 1000;
+    char linha[tamanho];
+    char cpf[12];
+    char valor[11];
+
+    extrato = fopen("extrato.txt", "r");
+
+    float saldo = 0.0;
+
+    while (fgets(linha, tamanho, extrato) != NULL) {
+        int c = 0;
+        while (linha[c] != '|') {
+            cpf[c] = linha[c];
+            c++;
+        }
+        cpf[c] = '\0'; 
+        c++;
+
+        if (ValidaIgualdade(cpf, cpfDigitado)) {
+            int v = 0;
+
+            while (linha[c] != ';') {
+                valor[v] = linha[c];
+                c++;
+                v++;
+            }
+            
+            valor[v] = '\0';
+    
+            float valor_numero = strtof(valor, NULL);
+   
+            saldo = saldo + valor_numero;
+        }
+    }
+    
+    fclose(extrato);
+
+    return saldo;
+}
+
+
 int Login(char* cpfDigitado, char* senhaDigitada){
     FILE *usuarios;
     int t = 256;
     char linha[t];
     char cpf[12];
     char senha[5];
+    int valorSaque;
 
     usuarios = fopen("usuarios.txt", "r");
     while (fgets(linha, t, usuarios) != NULL) {
@@ -84,16 +124,19 @@ int Login(char* cpfDigitado, char* senhaDigitada){
 int main(void) {
     char cpfDigitado[12];
     char senhaDigitada[5];
-    int valorDeposito;
+    float valorDeposito;
+    float valorSaque;
+    float saldo;
 
     printf("Digite o CPF: ");
     scanf("%11s", cpfDigitado);  
     printf("Digite a senha: ");
     scanf("%5s", senhaDigitada); 
 
-    const int resultado = Login(cpfDigitado, senhaDigitada);
+    int logado = Login(cpfDigitado, senhaDigitada);
     
-    if(resultado == 1){
+    
+    if(logado == 1){
         printf("Login inválido\n");
     } else {
         int opcao;
@@ -111,21 +154,22 @@ int main(void) {
 
         switch(opcao) {
             case 1: 
-                printf("Consultar Saldo...");
+                saldo = VerificaSaldo(cpfDigitado);
+                printf("Seu saldo atual é: %.2f\n", saldo);
                 break;
             case 2: 
                 printf("Consultar extrato...");
                 break;
             case 3: 
                 printf("Digite o valor que deseja depositar em Reais: ");
-                scanf("%d", &valorDeposito);
+                scanf("%f", &valorDeposito);
                 if(valorDeposito > 0){
                 Depositar(valorDeposito, cpfDigitado);
                 }
                 printf("Valor depositado!\n");
                 break;
             case 4: 
-                printf("Sacar...");
+                printf("Fazer funcao para sacar");
                 break;
             case 5: 
                 printf("Comprar criptomoedas...");
