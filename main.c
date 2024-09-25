@@ -74,7 +74,7 @@ char Depositar(float valorDeposito, char* cpfDigitado){
 
 float VerificaSaldo(char* cpfDigitado) {
     FILE *extrato;
-    int tamanho = 1000;
+    int tamanho = 100000;
     char linha[tamanho];
     char cpf[12];
     char valor[11];
@@ -149,25 +149,38 @@ int Sacar(float valorSaque, char*senhaDigitada, char* cpfDigitado){
 float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
     float saldo = VerificaSaldo(cpfDigitado); 
     FILE *extrato;
+    float taxa = 0.0;
     float bitcoin_taxa = 2.0 / 100.0;
     float etherium_taxa = 1.0 / 100.0;
     float ripple_taxa = 1.0 / 100.0;
     float resultado = 0.0;
+    char confirmacao;
+    float valorCripto = 0.0;
+    char cripto_nome[9];
 
     extrato = fopen("extrato.txt", "a");
 
     if (saldo >= valorCompra) {
 
         if (criptoDesejada == 'B'){
-            resultado = valorCompra / bitcoin_taxa;
+            valorCripto = valorCompra / bitcoin_taxa;
+            taxa = bitcoin_taxa;
+            strcpy(cripto_nome, "Bitcoin");
+
             printf("Você comprou Bitcoin no valor de R$%.2f\n", resultado);
         } 
         else if (criptoDesejada == 'E'){
-            resultado = valorCompra * etherium_taxa;
+            valorCripto = valorCompra * etherium_taxa;
+            taxa = etherium_taxa;
+            strcpy(cripto_nome, "Etherium");
+
             printf("Você comprou Ethereum no valor de R$%.2f\n", resultado);
         } 
         else if (criptoDesejada == 'R'){
-            resultado = valorCompra * ripple_taxa;
+            valorCripto = valorCompra * ripple_taxa;
+            taxa = ripple_taxa;
+            strcpy(cripto_nome, "Riplle");
+
             printf("Você comprou Ripple no valor de R$%.2f\n", resultado);
         }  
         else {
@@ -176,21 +189,39 @@ float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
             return 0;
         }
 
+        printf("\nVocê está prestes a comprar %.3f %s no valor de R$%.2f\n", valorCripto, cripto_nome, valorCompra);
+        printf("Taxa cobrada: %.2f%%\n", taxa * 100.0);
+        printf("Confirma a compra? (S/N): ");
+        scanf(" %c", &confirmacao);
+
         time_t t = time(NULL);
         struct tm tm = *localtime(&t);
 
-        fprintf(extrato, "%s|+%.2f;#%c|%02d/%02d/%d|%02d:%02d:%02d\n", 
-                cpfDigitado, valorCompra, criptoDesejada,
-                tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,
-                tm.tm_hour, tm.tm_min, tm.tm_sec);
+        if (confirmacao == 'S'){
 
-        fclose(extrato);  
-        return resultado;
+            //adiciona a subtracao do saldo em reais
+            fprintf(extrato, "%s|#R-%.2f;%02d/%02d/%d|%02d:%02d:%02d\n", 
+                    cpfDigitado, valorCompra,
+                    tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,
+                    tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+            //adiciona a compra da criptomoeda escolhida
+            fprintf(extrato, "%s|+%.5f;#%c|%02d/%02d/%d|%02d:%02d:%02d\n", 
+                    cpfDigitado, valorCripto, criptoDesejada,
+                    tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,
+                    tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+            fclose(extrato);  
+            printf("Compra realizada!\n");
+         } else {
+            printf("Compra cancelada.\n");
+         }
     } else {
         printf("Saldo insuficiente para a compra!\n");
         fclose(extrato);
         return 0;
     }
+    return 0;
 }
 
     
@@ -307,7 +338,7 @@ int main(void) {
                     printf("E -> Ethereum\n");
                     printf("R -> Ripple\n");
 
-                    printf("\nDigite qual criptomoeda deseja comprar: ");
+                    printf("\nDigite qual criptomoeda deseja comprar (B ou E ou R): ");
                     scanf(" %c", &criptoDesejada);
 
                     printf("\nDigite o valor que deseja comprar em Reais: ");
