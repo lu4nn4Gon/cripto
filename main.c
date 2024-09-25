@@ -192,7 +192,7 @@ int main(void) {
     char senha[5];
     float saldo;
 
-    printf("Digite o CPF: ");
+    printf("\nDigite o CPF: ");
     scanf("%11s", cpfDigitado);  
     printf("Digite a senha: ");
     scanf("%5s", senhaDigitada); 
@@ -202,63 +202,63 @@ int main(void) {
     
     if(logado == 1){
         printf("Login invalido\n");
-    } else {
-        int opcao;
-        printf("Menu\n");
-        printf("\t1 - Consultar saldo \n");
-        printf("\t2 - Consultar extrato \n");
-        printf("\t3 - Depositar \n");
-        printf("\t4 - Sacar \n");
-        printf("\t5 - Comprar criptomoedas \n");
-        printf("\t6 - Vender criptomoedas \n");
-        printf("\t7 - Atualizar cotação da criptomoeda \n");
-        printf("\t0 - Sair \n");
-        printf("\n Escolha uma opção ");
-        scanf("%d", &opcao);
+    } while(logado == 0) {
+            int opcao;
+            printf("\nMenu\n");
+            printf("\t1 - Consultar saldo \n");
+            printf("\t2 - Consultar extrato \n");
+            printf("\t3 - Depositar \n");
+            printf("\t4 - Sacar \n");
+            printf("\t5 - Comprar criptomoedas \n");
+            printf("\t6 - Vender criptomoedas \n");
+            printf("\t7 - Atualizar cotação da criptomoeda \n");
+            printf("\t0 - Sair \n");
+            printf("\n Escolha uma opção:\n ");
+            scanf("%d", &opcao);
 
-        switch(opcao) {
-            case 1: 
-                saldo = VerificaSaldo(cpfDigitado); 
-                printf("Seu saldo atual e: %.2f\n", saldo);
-                break;
-            case 2: 
-                printf("Consultar extrato...");
-                break;
-            case 3: 
-                printf("Digite o valor que deseja depositar em Reais: ");
-                scanf("%f", &valorDeposito);
-                if(valorDeposito > 0){
-                Depositar(valorDeposito, cpfDigitado);
-                }
-                printf("Valor depositado!\n");
-                break;
-            case 4: 
-                printf("Digite o valor que deseja sacar em Reais: ");
-                scanf("%f", &valorSaque);
-                printf("Digite sua Senha: ");
-                scanf("%5s", senhaVerificacao); 
-                if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1){
-                    Sacar(valorSaque, senhaDigitada, cpfDigitado);
-                } else {
-                    printf("Senha incorreta\n");
-                }
-                break;
-            case 5: 
-                printf("Comprar criptomoedas...");
-                break;
-            case 6: 
-                printf("Vender criptomoedas...");
-                break;
-            case 7: 
-                printf("Atualizar cotação...");
-                break;
-            case 0:
-                printf("Saindo...\n"); 
-                break;
-            default:
-                printf("Opção inválida \n");
-                break;
-    }
+            switch(opcao) {
+                case 1: 
+                    saldo = VerificaSaldo(cpfDigitado); 
+                    printf("Seu saldo atual e: %.2f\n", saldo);
+                    break;
+                case 2: 
+                    printf("Consultar extrato...");
+                    break;
+                case 3: 
+                    printf("\nDigite o valor que deseja depositar em Reais: ");
+                    scanf("%f", &valorDeposito);
+                    if(valorDeposito > 0){
+                    Depositar(valorDeposito, cpfDigitado);
+                    }
+                    printf("Valor depositado!\n");
+                    break;
+                case 4: 
+                    printf("\nDigite o valor que deseja sacar em Reais: ");
+                    scanf("%f", &valorSaque);
+                    printf("Digite sua Senha: ");
+                    scanf("%5s", senhaVerificacao); 
+                    if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1){
+                        Sacar(valorSaque, senhaDigitada, cpfDigitado);
+                    } else {
+                        printf("Senha incorreta\n");
+                    }
+                    break;
+                case 5: 
+                    printf("Comprar criptomoedas...");
+                    break;
+                case 6: 
+                    printf("Vender criptomoedas...");
+                    break;
+                case 7: 
+                    printf("Atualizar cotação...");
+                    break;
+                case 0:
+                    printf("Saindo...\n"); 
+                    return 0;
+                default:
+                    printf("Opção inválida \n");
+                    break;
+        }
     }
 
     return 0;
