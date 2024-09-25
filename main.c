@@ -64,7 +64,7 @@ char Depositar(float valorDeposito, char* cpfDigitado){
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
 
-     fprintf(extrato, "%s|+%.2f;%02d/%02d/%d|%02d:%02d:%02d\n",cpfDigitado, valorDeposito,
+     fprintf(extrato, "%s|#R+%.2f;%02d/%02d/%d|%02d:%02d:%02d\n",cpfDigitado, valorDeposito,
             tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,  
             tm.tm_hour, tm.tm_min, tm.tm_sec);             
 
@@ -93,19 +93,26 @@ float VerificaSaldo(char* cpfDigitado) {
         c++;
 
         if (ValidaIgualdade(cpf, cpfDigitado)) {
-            int v = 0;
 
-            while (linha[c] != ';') {
-                valor[v] = linha[c];
-                c++;
-                v++;
+            if (linha[c] == '#' && linha[c+1] == 'R') {
+                c += 3;  // Avança para ignorar "#R"
+
+                int v = 0;
+                // Copia o valor ignorando o sinal + ou -
+                while (linha[c] != ';') {
+                    valor[v] = linha[c];
+                    c++;
+                    v++;
+                }
+
+                valor[v] = '\0';
+
+                float valor_numero = StringViraNumero(valor);
+                saldo = saldo + valor_numero;
             }
-            
-            valor[v] = '\0';
     
-            float valor_numero = StringViraNumero(valor);
-   
-            saldo = saldo + valor_numero;
+        }else if (linha[c] == '#' && linha[c+1] == 'B' || linha[c] == '#' && linha[c+1] == 'E' || linha[c] == '#' && linha[c+1] == 'R') {
+            continue; 
         }
     }
     
@@ -124,7 +131,7 @@ int Sacar(float valorSaque, char*senhaDigitada, char* cpfDigitado){
         time_t t = time(NULL);
         struct tm tm = *localtime(&t);
 
-        fprintf(extrato, "%s|-%.2f;%02d/%02d/%d|%02d:%02d:%02d\n", cpfDigitado, valorSaque,
+        fprintf(extrato, "%s|#R-%.2f;%02d/%02d/%d|%02d:%02d:%02d\n", cpfDigitado, valorSaque,
             tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,
             tm.tm_hour, tm.tm_min, tm.tm_sec);
         
@@ -135,6 +142,54 @@ int Sacar(float valorSaque, char*senhaDigitada, char* cpfDigitado){
     } else {
         printf("Saldo insuficiente.\n");
         return 0; 
+    }
+}
+
+
+float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
+    float saldo = VerificaSaldo(cpfDigitado); 
+    FILE *extrato;
+    float bitcoin_taxa = 2.0 / 100.0;
+    float etherium_taxa = 1.0 / 100.0;
+    float ripple_taxa = 1.0 / 100.0;
+    float resultado = 0.0;
+
+    extrato = fopen("extrato.txt", "a");
+
+    if (saldo >= valorCompra) {
+
+        if (criptoDesejada == 'B'){
+            resultado = valorCompra / bitcoin_taxa;
+            printf("Você comprou Bitcoin no valor de R$%.2f\n", resultado);
+        } 
+        else if (criptoDesejada == 'E'){
+            resultado = valorCompra * etherium_taxa;
+            printf("Você comprou Ethereum no valor de R$%.2f\n", resultado);
+        } 
+        else if (criptoDesejada == 'R'){
+            resultado = valorCompra * ripple_taxa;
+            printf("Você comprou Ripple no valor de R$%.2f\n", resultado);
+        }  
+        else {
+            printf("Criptomoeda inválida!\n");
+            fclose(extrato);
+            return 0;
+        }
+
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+
+        fprintf(extrato, "%s|+%.2f;#%c|%02d/%02d/%d|%02d:%02d:%02d\n", 
+                cpfDigitado, valorCompra, criptoDesejada,
+                tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,
+                tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+        fclose(extrato);  
+        return resultado;
+    } else {
+        printf("Saldo insuficiente para a compra!\n");
+        fclose(extrato);
+        return 0;
     }
 }
 
@@ -187,8 +242,10 @@ int main(void) {
     char cpfDigitado[12];
     char senhaDigitada[5];
     char senhaVerificacao[5];
+    char criptoDesejada;
     float valorDeposito;
     float valorSaque;
+    float valorCompra;
     char senha[5];
     float saldo;
 
@@ -202,7 +259,8 @@ int main(void) {
     
     if(logado == 1){
         printf("Login invalido\n");
-    } while(logado == 0) {
+    } else {
+        
             int opcao;
             printf("\nMenu\n");
             printf("\t1 - Consultar saldo \n");
@@ -213,7 +271,7 @@ int main(void) {
             printf("\t6 - Vender criptomoedas \n");
             printf("\t7 - Atualizar cotação da criptomoeda \n");
             printf("\t0 - Sair \n");
-            printf("\n Escolha uma opção:\n ");
+            printf("\n Escolha uma opção: ");
             scanf("%d", &opcao);
 
             switch(opcao) {
@@ -244,7 +302,25 @@ int main(void) {
                     }
                     break;
                 case 5: 
-                    printf("Comprar criptomoedas...");
+                    printf("\nCriptomoedas disponiveis para compra\n");
+                    printf("B -> Bitcoin\n");
+                    printf("E -> Ethereum\n");
+                    printf("R -> Ripple\n");
+
+                    printf("\nDigite qual criptomoeda deseja comprar: ");
+                    scanf(" %c", &criptoDesejada);
+
+                    printf("\nDigite o valor que deseja comprar em Reais: ");
+                    scanf("%f", &valorCompra);
+
+                    printf("Digite sua Senha: ");
+                    scanf("%5s", senhaVerificacao); 
+
+                    if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1){
+                        CompraCripto(valorCompra, criptoDesejada, cpfDigitado);
+                    } else {
+                        printf("Senha incorreta\n");
+                    }
                     break;
                 case 6: 
                     printf("Vender criptomoedas...");
@@ -258,7 +334,8 @@ int main(void) {
                 default:
                     printf("Opção inválida \n");
                     break;
-        }
+        
+    }
     }
 
     return 0;
