@@ -3,7 +3,14 @@
 #include <string.h>
 #include <time.h>
 
-//essa funcao
+float AtualizarCotacao(float valorAtual) {
+    
+    float variacao = ((rand() % 11) - 5) * (5.0 / 100.0);
+    
+    float novaCotacao = valorAtual * variacao;
+    return novaCotacao;
+}
+
 float StringViraNumero(char* string) {
     float resultado = 0.0;
     float fator = 1.0;
