@@ -3,8 +3,9 @@
 #include <string.h>
 #include <time.h>
 
+
 float AtualizarCotacao(float valorAtual) {
-    
+
     float variacao = ((rand() % 11) - 5) * (5.0 / 100.0);
     
     float novaCotacao = valorAtual * variacao;
@@ -286,6 +287,13 @@ int main(void) {
     float valorCompra;
     char senha[5];
     float saldo;
+    float bitcoin_preco = 10000.0;
+    float ethereum_preco = 500.0;
+    float ripple_preco = 1.0;
+    float bitcoin_atualizado;
+    float ethereum_atualizado;
+    float ripple_atualizado;
+    srand(time(NULL));
 
     printf("\nDigite o CPF: ");
     scanf("%11s", cpfDigitado);  
@@ -364,7 +372,14 @@ int main(void) {
                     printf("Vender criptomoedas...");
                     break;
                 case 7: 
-                    printf("Atualizar cotação...");
+                    bitcoin_atualizado = AtualizarCotacao(bitcoin_preco);
+                    ethereum_atualizado = AtualizarCotacao(ethereum_preco);
+                    ripple_atualizado = AtualizarCotacao(ripple_preco);
+
+                    printf("/nCotações atualizadas:\n");
+                    printf("Bitcoin: R$%.2f\n", bitcoin_atualizado);
+                    printf("Ethereum: R$%.2f\n", ethereum_atualizado);
+                    printf("Ripple: R$%.2f\n", ripple_atualizado);
                     break;
                 case 0:
                     printf("Saindo...\n"); 
