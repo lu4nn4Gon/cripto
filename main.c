@@ -8,7 +8,7 @@ float AtualizarCotacao(float valorAtual) {
 
     float variacao = ((rand() % 11) - 5) * (5.0 / 100.0);
     
-    float novaCotacao = valorAtual * variacao;
+    float novaCotacao = valorAtual + (valorAtual * variacao);
     return novaCotacao;
 }
 
@@ -64,84 +64,105 @@ float ValidaIgualdade(char* stringOne, char* stringTwo){
 
 char Depositar(float valorDeposito, char* cpfDigitado){
     FILE *extrato;
-    int tamanho = 100000;
-    char linha[tamanho];
+    char tipoTransacao = 'D';
+    char moeda = 'C';
 
-    extrato = fopen("extrato.txt", "a");
+    extrato = fopen("extrato.bin", "ab");
 
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
 
-     fprintf(extrato, "%s|#R+%.2f;%02d/%02d/%d|%02d:%02d:%02d\n",cpfDigitado, valorDeposito,
-            tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,  
-            tm.tm_hour, tm.tm_min, tm.tm_sec);             
 
+    fwrite(&tipoTransacao, sizeof(char), 1, extrato);
+
+    
+    fwrite(&moeda, sizeof(char), 1, extrato);
+
+    fwrite(cpfDigitado, sizeof(char), 11, extrato);
+
+    fwrite(&valorDeposito, sizeof(float), 1, extrato);
+
+    fwrite(&tm.tm_mday, sizeof(int), 1, extrato);   // Dia
+    fwrite(&tm.tm_mon, sizeof(int), 1, extrato);    // Mês (
+    fwrite(&tm.tm_year, sizeof(int), 1, extrato);   // Ano 
+   
+    fwrite(&tm.tm_hour, sizeof(int), 1, extrato);   // Hora
+    fwrite(&tm.tm_min, sizeof(int), 1, extrato);    // Minuto
+    fwrite(&tm.tm_sec, sizeof(int), 1, extrato);    // Segundo
     fclose(extrato);
     return 0;
 }
 
 float VerificaSaldo(char* cpfDigitado) {
     FILE *extrato;
-    int tamanho = 100000;
-    char linha[tamanho];
     char cpf[12];
-    char valor[11];
-
-    extrato = fopen("extrato.txt", "r");
-
+    char tipoTransacao;
+    char moeda;
+    float valor;
+    int dia, mes, ano, hora, minuto, segundo;
     float saldo = 0.0;
 
-    while (fgets(linha, tamanho, extrato) != NULL) {
-        int c = 0;
-        while (linha[c] != '|') {
-            cpf[c] = linha[c];
-            c++;
-        }
-        cpf[c] = '\0'; 
-        c++;
+    extrato = fopen("extrato.bin", "rb");
 
-        if (ValidaIgualdade(cpf, cpfDigitado)) {
 
-            if (linha[c] == '#' && linha[c+1] == 'R') {
-                c += 3;  // Avança para ignorar "#R"
+    while (fread(&tipoTransacao, sizeof(char), 1, extrato) == 1) {
 
-                int v = 0;
-                // Copia o valor ignorando o sinal + ou -
-                while (linha[c] != ';') {
-                    valor[v] = linha[c];
-                    c++;
-                    v++;
-                }
+        fread(&moeda, sizeof(char), 1, extrato);
 
-                valor[v] = '\0';
+        fread(cpf, sizeof(char), 11, extrato);
+        cpf[11] = '\0';  
 
-                float valor_numero = StringViraNumero(valor);
-                saldo = saldo + valor_numero;
+        fread(&valor, sizeof(float), 1, extrato);
+
+        fread(&dia, sizeof(int), 1, extrato);
+        fread(&mes, sizeof(int), 1, extrato);
+        fread(&ano, sizeof(int), 1, extrato);
+        fread(&hora, sizeof(int), 1, extrato);
+        fread(&minuto, sizeof(int), 1, extrato);
+        fread(&segundo, sizeof(int), 1, extrato);
+
+
+        if (ValidaIgualdade(cpf, cpfDigitado) && moeda == 'C') {
+            if (tipoTransacao == 'D') {
+                saldo = saldo + valor; 
+            } else if (tipoTransacao == 'S') {
+                saldo = saldo - valor;  
             }
-    
-        }else if (linha[c] == '#' && linha[c+1] == 'B' || linha[c] == '#' && linha[c+1] == 'E' || linha[c] == '#' && linha[c+1] == 'R') {
-            continue; 
         }
     }
-    
+
     fclose(extrato);
 
-    return saldo;
+    return saldo; 
+
 }
+
 
 int Sacar(float valorSaque, char*senhaDigitada, char* cpfDigitado){
     FILE *extrato;
-    int saldo = VerificaSaldo(cpfDigitado);
+    float saldo = VerificaSaldo(cpfDigitado);
+ 
 
     if (saldo >= valorSaque) {
-        extrato = fopen("extrato.txt", "a");
+        extrato = fopen("extrato.bin", "ab");
 
         time_t t = time(NULL);
         struct tm tm = *localtime(&t);
 
-        fprintf(extrato, "%s|#R-%.2f;%02d/%02d/%d|%02d:%02d:%02d\n", cpfDigitado, valorSaque,
-            tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,
-            tm.tm_hour, tm.tm_min, tm.tm_sec);
+        char tipoTransacao = 'S';  
+        char moeda = 'C';         
+
+        fwrite(&tipoTransacao, sizeof(char), 1, extrato); 
+        fwrite(&moeda, sizeof(char), 1, extrato);         
+        fwrite(cpfDigitado, sizeof(char), 11, extrato);   
+        fwrite(&valorSaque, sizeof(float), 1, extrato);   
+
+        fwrite(&tm.tm_mday, sizeof(int), 1, extrato);   
+        fwrite(&tm.tm_mon, sizeof(int), 1, extrato);    
+        fwrite(&tm.tm_year, sizeof(int), 1, extrato);   
+        fwrite(&tm.tm_hour, sizeof(int), 1, extrato);   
+        fwrite(&tm.tm_min, sizeof(int), 1, extrato);    
+        fwrite(&tm.tm_sec, sizeof(int), 1, extrato);   
         
         fclose(extrato);
 
@@ -164,32 +185,42 @@ float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
     float resultado = 0.0;
     char confirmacao;
     float valorCripto = 0.0;
-    char cripto_nome[9];
+    char *cripto_nome;
+    char tipoTransacaoReais = 'S';  
+    char moedaReais = 'C';
+    char tipoTransacaoCripto = 'D';
+    float bitcoinCotacao = 350000.0;
+    float ethereumCotacao = 14000.0;
+    float rippleCotacao = 3.20; 
 
-    extrato = fopen("extrato.txt", "a");
+    extrato = fopen("extrato.bin", "ab");
+    if (extrato == NULL) {
+        printf("Erro ao abrir o arquivo de extrato.\n");
+        return 0;
+    }
 
     if (saldo >= valorCompra) {
 
         if (criptoDesejada == 'B'){
-            valorCripto = valorCompra / bitcoin_taxa;
+            valorCripto = (valorCompra * (1 - bitcoin_taxa)) / bitcoinCotacao;
             taxa = bitcoin_taxa;
-            strcpy(cripto_nome, "Bitcoin");
+            cripto_nome = "Bitcoin"; 
 
-            printf("Você comprou Bitcoin no valor de R$%.2f\n", resultado);
+            printf("Você comprou Bitcoin no valor de R$%.5f\n", valorCompra);
         } 
         else if (criptoDesejada == 'E'){
-            valorCripto = valorCompra * etherium_taxa;
+            valorCripto = (valorCompra * (1 - etherium_taxa)) / ethereumCotacao;
             taxa = etherium_taxa;
-            strcpy(cripto_nome, "Etherium");
+            cripto_nome = "Ethereum"; 
 
-            printf("Você comprou Ethereum no valor de R$%.2f\n", resultado);
+            printf("Você comprou Ethereum no valor de R$%.3f\n", valorCompra);
         } 
         else if (criptoDesejada == 'R'){
-            valorCripto = valorCompra * ripple_taxa;
+            valorCripto = (valorCompra * (1 - ripple_taxa)) / rippleCotacao;
             taxa = ripple_taxa;
-            strcpy(cripto_nome, "Riplle");
+            cripto_nome = "Ripple"; 
 
-            printf("Você comprou Ripple no valor de R$%.2f\n", resultado);
+            printf("Você comprou Ripple no valor de R$%.3f\n", valorCompra);
         }  
         else {
             printf("Criptomoeda inválida!\n");
@@ -197,7 +228,7 @@ float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
             return 0;
         }
 
-        printf("\nVocê está prestes a comprar %.3f %s no valor de R$%.2f\n", valorCripto, cripto_nome, valorCompra);
+        printf("\nVocê está prestes a comprar %.5f %s no valor de R$%.2f\n", valorCripto, cripto_nome, valorCompra);
         printf("Taxa cobrada: %.2f%%\n", taxa * 100.0);
         printf("Confirma a compra? (S/N): ");
         scanf(" %c", &confirmacao);
@@ -205,25 +236,37 @@ float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
         time_t t = time(NULL);
         struct tm tm = *localtime(&t);
 
-        if (confirmacao == 'S'){
+        if (confirmacao == 'S') {
 
-            //adiciona a subtracao do saldo em reais
-            fprintf(extrato, "%s|#R-%.2f;%02d/%02d/%d|%02d:%02d:%02d\n", 
-                    cpfDigitado, valorCompra,
-                    tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,
-                    tm.tm_hour, tm.tm_min, tm.tm_sec);
+            // Registra a subtração do saldo em reais
+            fwrite(&tipoTransacaoReais, sizeof(char), 1, extrato);
+            fwrite(&moedaReais, sizeof(char), 1, extrato);
+            fwrite(cpfDigitado, sizeof(char), 11, extrato);
+            fwrite(&valorCompra, sizeof(float), 1, extrato);
+            fwrite(&tm.tm_mday, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_mon, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_year, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_hour, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_min, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_sec, sizeof(int), 1, extrato);
 
-            //adiciona a compra da criptomoeda escolhida
-            fprintf(extrato, "%s|+%.5f;#%c|%02d/%02d/%d|%02d:%02d:%02d\n", 
-                    cpfDigitado, valorCripto, criptoDesejada,
-                    tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900,
-                    tm.tm_hour, tm.tm_min, tm.tm_sec);
+            // Registra a compra da criptomoeda
+            fwrite(&tipoTransacaoCripto, sizeof(char), 1, extrato);
+            fwrite(&criptoDesejada, sizeof(char), 1, extrato);
+            fwrite(cpfDigitado, sizeof(char), 11, extrato);
+            fwrite(&valorCripto, sizeof(float), 1, extrato);
+            fwrite(&tm.tm_mday, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_mon, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_year, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_hour, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_min, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_sec, sizeof(int), 1, extrato);
 
             fclose(extrato);  
             printf("Compra realizada!\n");
-         } else {
+        } else {
             printf("Compra cancelada.\n");
-         }
+        }
     } else {
         printf("Saldo insuficiente para a compra!\n");
         fclose(extrato);
@@ -232,41 +275,25 @@ float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
     return 0;
 }
 
+
+
     
 
 
 int Login(char* cpfDigitado, char* senhaDigitada){
     FILE *usuarios;
-    int t = 256;
-    char linha[t];
     char cpf[12];
     char senha[5];
-    int valorSaque;
 
-    usuarios = fopen("usuarios.txt", "r");
-    while (fgets(linha, t, usuarios) != NULL) {
-        
-        int c = 0;
-        int s = 0;
+    usuarios = fopen("usuarios.bin", "rb");
 
-        while (linha[c] != '-') {
-            cpf[c] = linha[c]; 
-            c++;
-        }
-        cpf[c] = '\0'; 
-
-        c++;
-
-        while (linha[c] != '\0') {
-            senha[s] = linha[c];
-            c++;
-            s++;
-        }
-        senha[s] = '\0';
+    while (fread(cpf, sizeof(char), 11, usuarios) == 11 && fread(senha, sizeof(char), 4, usuarios) == 4) {
+        cpf[11] = '\0';   
+        senha[4] = '\0';  
 
         if (ValidaIgualdade(cpf, cpfDigitado) && ValidaIgualdade(senha, senhaDigitada)) {
             fclose(usuarios);
-            return 0; 
+            return 0;
         }
     }
 
@@ -282,18 +309,15 @@ int main(void) {
     char senhaDigitada[5];
     char senhaVerificacao[5];
     char criptoDesejada;
-    float valorDeposito;
-    float valorSaque;
-    float valorCompra;
+    float valorDeposito, valorSaque, valorCompra;
     char senha[5];
     float saldo;
     float bitcoin_preco = 10000.0;
     float ethereum_preco = 500.0;
     float ripple_preco = 1.0;
-    float bitcoin_atualizado;
-    float ethereum_atualizado;
-    float ripple_atualizado;
+    float bitcoin_atualizado, ethereum_atualizado, ripple_atualizado;
     srand(time(NULL));
+    float saldo_bitcoin, saldo_etherium, saldo_ripple;
 
     printf("\nDigite o CPF: ");
     scanf("%11s", cpfDigitado);  
@@ -323,7 +347,7 @@ int main(void) {
             switch(opcao) {
                 case 1: 
                     saldo = VerificaSaldo(cpfDigitado); 
-                    printf("Seu saldo atual e: %.2f\n", saldo);
+                    printf("\nSeu saldo atual em Reais: %.2f\n", saldo);
                     break;
                 case 2: 
                     printf("Consultar extrato...");
@@ -366,7 +390,7 @@ int main(void) {
                         CompraCripto(valorCompra, criptoDesejada, cpfDigitado);
                     } else {
                         printf("Senha incorreta\n");
-                    }
+                    // }
                     break;
                 case 6: 
                     printf("Vender criptomoedas...");
@@ -376,7 +400,7 @@ int main(void) {
                     ethereum_atualizado = AtualizarCotacao(ethereum_preco);
                     ripple_atualizado = AtualizarCotacao(ripple_preco);
 
-                    printf("/nCotações atualizadas:\n");
+                    printf("\nCotações atualizadas:\n");
                     printf("Bitcoin: R$%.2f\n", bitcoin_atualizado);
                     printf("Ethereum: R$%.2f\n", ethereum_atualizado);
                     printf("Ripple: R$%.2f\n", ripple_atualizado);
@@ -392,4 +416,5 @@ int main(void) {
     }
 
     return 0;
+}
 }
