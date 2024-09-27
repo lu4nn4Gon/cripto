@@ -301,6 +301,24 @@ int Sacar(float valorSaque, char*senhaDigitada, char* cpfDigitado){
 }
 
 
+ char *ConsultarSaldo(char * cpfDigitado){
+    float saldo = VerificaSaldo(cpfDigitado); 
+    float saldo_bitcoin = VerificaSaldo_bitcoin(cpfDigitado); 
+    float saldo_etherium = VerificaSaldo_etherium(cpfDigitado); 
+    float saldo_ripple = VerificaSaldo_ripple(cpfDigitado); 
+    char* resultado = (char*)malloc(500 * sizeof(char));
+
+    sprintf(resultado,
+            "\nUsuario: %.11s\n"
+            "Seu saldo atual em Reais: %.2f\n"
+            "Seu saldo atual em Bitcoin: %.6f\n"
+            "Seu saldo atual em Etherium: %.6f\n"
+            "Seu saldo atual em Ripple: %.6f\n",
+            cpfDigitado, saldo, saldo_bitcoin, saldo_etherium, saldo_ripple);
+
+    return resultado;
+}
+
 float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
     float saldo = VerificaSaldo(cpfDigitado); 
     FILE *extrato;
@@ -441,13 +459,13 @@ int main(void) {
     char criptoDesejada;
     float valorDeposito, valorSaque, valorCompra;
     char senha[5];
-    float saldo;
     float bitcoin_preco = 10000.0;
     float ethereum_preco = 500.0;
     float ripple_preco = 1.0;
     float bitcoin_atualizado, ethereum_atualizado, ripple_atualizado;
     srand(time(NULL));
     float saldo_bitcoin, saldo_etherium, saldo_ripple;
+    char* saldo;
 
     printf("\nDigite o CPF: ");
     scanf("%11s", cpfDigitado);  
@@ -476,14 +494,9 @@ int main(void) {
 
             switch(opcao) {
                 case 1: 
-                    saldo = VerificaSaldo(cpfDigitado); 
-                    printf("\nSeu saldo atual em Reais: %.2f\n", saldo);
-                    saldo_bitcoin = VerificaSaldo_bitcoin(cpfDigitado); 
-                    printf("Seu saldo atual em Bitcoin: %.3f\n", saldo_bitcoin);
-                    saldo_etherium = VerificaSaldo_etherium(cpfDigitado); 
-                    printf("Seu saldo atual em Etherium: %.3f\n", saldo_etherium);
-                    saldo_ripple = VerificaSaldo_ripple(cpfDigitado); 
-                    printf("Seu saldo atual em Ripple: %.2f\n", saldo_ripple);
+                    saldo = ConsultarSaldo(cpfDigitado);
+                    printf("%s", saldo);
+                    free(saldo);
                     break;
                 case 2: 
                     printf("Consultar extrato...");
