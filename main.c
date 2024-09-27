@@ -4,6 +4,7 @@
 #include <time.h>
 
 
+
 float StringViraNumero(char* string) {
     float resultado = 0.0;
     float fator = 1.0;
@@ -181,6 +182,9 @@ float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
     char tipoTransacaoReais = 'S';  
     char moedaReais = 'C';
     char tipoTransacaoCripto = 'D';
+    float bitcoinCotacao = 350000.0;
+    float ethereumCotacao = 14000.0;
+    float rippleCotacao = 3.20; 
 
 
     extrato = fopen("extrato.bin", "ab");
@@ -192,21 +196,21 @@ float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
     if (saldo >= valorCompra) {
 
         if (criptoDesejada == 'B'){
-            valorCripto = (valorCompra * (1 - bitcoin_taxa));
+            valorCripto = (valorCompra * (1 - bitcoin_taxa)) / bitcoinCotacao;
             taxa = bitcoin_taxa;
             cripto_nome = "Bitcoin"; 
 
             printf("Você comprou Bitcoin no valor de R$%.5f\n", valorCompra);
         } 
         else if (criptoDesejada == 'E'){
-            valorCripto = (valorCompra * (1 - etherium_taxa));
+            valorCripto = (valorCompra * (1 - etherium_taxa)) / ethereumCotacao;
             taxa = etherium_taxa;
             cripto_nome = "Ethereum"; 
 
             printf("Você comprou Ethereum no valor de R$%.3f\n", valorCompra);
         } 
         else if (criptoDesejada == 'R'){
-            valorCripto = (valorCompra * (1 - ripple_taxa));
+            valorCripto = (valorCompra * (1 - ripple_taxa)) / rippleCotacao;
             taxa = ripple_taxa;
             cripto_nome = "Ripple"; 
 
@@ -290,6 +294,8 @@ int Login(char* cpfDigitado, char* senhaDigitada){
     fclose(usuarios);
     return 1; 
 }
+
+
 
 
 int main(void) {
