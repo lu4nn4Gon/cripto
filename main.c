@@ -423,6 +423,96 @@ float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
     return 0;
 }
 
+float VenderCripto(float valorVenda, char criptoDesejada, char* cpfDigitado) {
+    float saldoCripto = 0.0;
+    FILE *extrato;
+    float taxa = 0.0;
+    float bitcoin_taxa = 3.0 / 100.0;
+    float etherium_taxa = 2.0 / 100.0;
+    float ripple_taxa = 1.0 / 100.0;
+    float valorReais = 0.0;
+    char confirmacao;
+    char tipoTransacaoReais = 'D';  
+    char moedaReais = 'C';
+    char tipoTransacaoCripto = 'S';
+    float bitcoinCotacao = 350000.0;
+    float ethereumCotacao = 14000.0;
+    float rippleCotacao = 3.20;
+
+    bitcoinCotacao = AtualizarCotacao(bitcoinCotacao);
+    ethereumCotacao = AtualizarCotacao(ethereumCotacao);
+    rippleCotacao = AtualizarCotacao(rippleCotacao);
+
+    extrato = fopen("extrato.bin", "ab");
+
+    if (criptoDesejada == 'B') {
+        saldoCripto = VerificaSaldo_bitcoin(cpfDigitado);
+        taxa = bitcoin_taxa;
+        valorReais = (valorVenda * (1 - bitcoin_taxa)) / bitcoinCotacao;
+    } 
+    else if (criptoDesejada == 'E') {
+        saldoCripto = VerificaSaldo_etherium(cpfDigitado);
+        taxa = etherium_taxa;
+        valorReais = (valorVenda * (1 - etherium_taxa)) / ethereumCotacao;
+    } 
+    else if (criptoDesejada == 'R') {
+        saldoCripto = VerificaSaldo_ripple(cpfDigitado);
+        taxa = ripple_taxa;
+        valorReais = (valorVenda * (1 - ripple_taxa)) / rippleCotacao;
+    } 
+    else {
+        printf("Criptomoeda inválida!\n");
+        fclose(extrato);
+        return 0;
+    }
+
+    if (saldoCripto >= valorVenda) {
+        printf("\nVocê está prestes a vender %.5f de criptomoeda por R$%.5f\n", valorVenda, valorReais);
+        printf("Taxa cobrada: %.2f%%\n", taxa * 100.0);
+        printf("Confirma a venda? (S/N): ");
+        scanf(" %c", &confirmacao);
+
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+
+        if (confirmacao == 'S') {
+
+            fwrite(&tipoTransacaoCripto, sizeof(char), 1, extrato);
+            fwrite(&criptoDesejada, sizeof(char), 1, extrato);
+            fwrite(cpfDigitado, sizeof(char), 11, extrato);
+            fwrite(&valorVenda, sizeof(float), 1, extrato);
+            fwrite(&tm.tm_mday, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_mon, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_year, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_hour, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_min, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_sec, sizeof(int), 1, extrato);
+
+            fwrite(&tipoTransacaoReais, sizeof(char), 1, extrato);
+            fwrite(&moedaReais, sizeof(char), 1, extrato);
+            fwrite(cpfDigitado, sizeof(char), 11, extrato);
+            fwrite(&valorReais, sizeof(float), 1, extrato);
+            fwrite(&tm.tm_mday, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_mon, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_year, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_hour, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_min, sizeof(int), 1, extrato);
+            fwrite(&tm.tm_sec, sizeof(int), 1, extrato);
+
+            fclose(extrato);
+            printf("Venda realizada com sucesso!\n");
+        } else {
+            printf("Venda cancelada.\n");
+        }
+    } else {
+        printf("Saldo insuficiente de criptomoeda para a venda!\n");
+        fclose(extrato);
+        return 0;
+    }
+
+    return 0;
+}
+
 
 
     
@@ -457,7 +547,7 @@ int main(void) {
     char senhaDigitada[5];
     char senhaVerificacao[5];
     char criptoDesejada;
-    float valorDeposito, valorSaque, valorCompra;
+    float valorDeposito, valorSaque, valorCompra, valorVenda;
     char senha[5];
     float bitcoin_preco = 10000.0;
     float ethereum_preco = 500.0;
@@ -539,10 +629,28 @@ int main(void) {
                         CompraCripto(valorCompra, criptoDesejada, cpfDigitado);
                     } else {
                         printf("Senha incorreta\n");
-                    // }
+                    }   
                     break;
                 case 6: 
-                    printf("Vender criptomoedas...");
+                    printf("\nCriptomoedas disponiveis para vender\n");
+                    printf("B -> Bitcoin\n");
+                    printf("E -> Ethereum\n");
+                    printf("R -> Ripple\n");
+
+                    printf("\nDigite qual criptomoeda deseja vender (B ou E ou R): ");
+                    scanf(" %c", &criptoDesejada);
+
+                    printf("\nDigite o valor que deseja vender na criptomoeda escolhida: ");
+                    scanf("%f", &valorVenda);
+
+                    printf("Digite sua Senha: ");
+                    scanf("%5s", senhaVerificacao); 
+
+                    if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1){
+                        VenderCripto(valorVenda, criptoDesejada, cpfDigitado);
+                    } else {
+                        printf("Senha incorreta\n");
+                    }
                     break;
                 case 7: 
                     bitcoin_atualizado = AtualizarCotacao(bitcoin_preco);
@@ -565,5 +673,4 @@ int main(void) {
     }
 
     return 0;
-}
 }
