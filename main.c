@@ -588,15 +588,13 @@ int Login(char* cpfDigitado, char* senhaDigitada){
 
         if (ValidaIgualdade(cpf, cpfDigitado) && ValidaIgualdade(senha, senhaDigitada)) {
             fclose(usuarios);
-            return 0;
+            return 0; 
         }
     }
 
     fclose(usuarios);
     return 1; 
 }
-
-
 
 int main(void) {
     char cpfDigitado[12];
@@ -613,8 +611,9 @@ int main(void) {
     float saldo_bitcoin, saldo_etherium, saldo_ripple;
     char* saldo;
 
-    int logado;
-    while (logado == 1) {
+    int logado = 1;  
+
+    if (logado == 1) {
         printf("\nDigite o CPF: ");
         scanf("%11s", cpfDigitado);
         printf("Digite a senha: ");
@@ -623,11 +622,12 @@ int main(void) {
         logado = Login(cpfDigitado, senhaDigitada);
 
         if (logado == 1) {
-            printf("Login inválido. Tente novamente.\n");
+            printf("Login inválido.\n");
+            return 1; 
+        } else {
+            printf("Login realizado com sucesso!\n");
         }
     }
-
-    printf("Login realizado com sucesso!\n");
 
     int opcao = 1;
     while (opcao != 0) {
