@@ -12,6 +12,8 @@ float AtualizarCotacao(float valorAtual) {
     return novaCotacao;
 }
 
+
+
 float StringViraNumero(char* string) {
     float resultado = 0.0;
     float fator = 1.0;
@@ -515,9 +517,6 @@ float VenderCripto(float valorVenda, char criptoDesejada, char* cpfDigitado) {
 
 
 
-    
-
-
 int Login(char* cpfDigitado, char* senhaDigitada){
     FILE *usuarios;
     char cpf[12];
@@ -556,6 +555,8 @@ int main(void) {
     srand(time(NULL));
     float saldo_bitcoin, saldo_etherium, saldo_ripple;
     char* saldo;
+
+
 
     printf("\nDigite o CPF: ");
     scanf("%11s", cpfDigitado);  
