@@ -598,7 +598,6 @@ int Login(char* cpfDigitado, char* senhaDigitada){
 
 
 
-
 int main(void) {
     char cpfDigitado[12];
     char senhaDigitada[5];
@@ -614,121 +613,123 @@ int main(void) {
     float saldo_bitcoin, saldo_etherium, saldo_ripple;
     char* saldo;
 
+    int logado;
+    while (logado == 1) {
+        printf("\nDigite o CPF: ");
+        scanf("%11s", cpfDigitado);
+        printf("Digite a senha: ");
+        scanf("%5s", senhaDigitada);
 
+        logado = Login(cpfDigitado, senhaDigitada);
 
-    printf("\nDigite o CPF: ");
-    scanf("%11s", cpfDigitado);  
-    printf("Digite a senha: ");
-    scanf("%5s", senhaDigitada); 
-
-    int logado = Login(cpfDigitado, senhaDigitada);
-    
-    
-    if(logado == 1){
-        printf("Login invalido\n");
-    } else {
-        
-            int opcao;
-            printf("\nMenu\n");
-            printf("\t1 - Consultar saldo \n");
-            printf("\t2 - Consultar extrato \n");
-            printf("\t3 - Depositar \n");
-            printf("\t4 - Sacar \n");
-            printf("\t5 - Comprar criptomoedas \n");
-            printf("\t6 - Vender criptomoedas \n");
-            printf("\t7 - Atualizar cotação da criptomoeda \n");
-            printf("\t0 - Sair \n");
-            printf("\n Escolha uma opção: ");
-            scanf("%d", &opcao);
-
-            switch(opcao) {
-                case 1: 
-                    saldo = ConsultarSaldo(cpfDigitado);
-                    printf("%s", saldo);
-                    free(saldo);
-                    break;
-                case 2: 
-                    ConsultarExtrato(cpfDigitado);
-                    break;
-                case 3: 
-                    printf("\nDigite o valor que deseja depositar em Reais: ");
-                    scanf("%f", &valorDeposito);
-                    if(valorDeposito > 0){
-                    Depositar(valorDeposito, cpfDigitado);
-                    }
-                    printf("Valor depositado!\n");
-                    break;
-                case 4: 
-                    printf("\nDigite o valor que deseja sacar em Reais: ");
-                    scanf("%f", &valorSaque);
-                    printf("Digite sua Senha: ");
-                    scanf("%5s", senhaVerificacao); 
-                    if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1){
-                        Sacar(valorSaque, senhaDigitada, cpfDigitado);
-                    } else {
-                        printf("Senha incorreta\n");
-                    }
-                    break;
-                case 5: 
-                    printf("\nCriptomoedas disponiveis para compra\n");
-                    printf("B -> Bitcoin\n");
-                    printf("E -> Ethereum\n");
-                    printf("R -> Ripple\n");
-
-                    printf("\nDigite qual criptomoeda deseja comprar (B ou E ou R): ");
-                    scanf(" %c", &criptoDesejada);
-
-                    printf("\nDigite o valor que deseja comprar em Reais: ");
-                    scanf("%f", &valorCompra);
-
-                    printf("Digite sua Senha: ");
-                    scanf("%5s", senhaVerificacao); 
-
-                    if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1){
-                        CompraCripto(valorCompra, criptoDesejada, cpfDigitado);
-                    } else {
-                        printf("Senha incorreta\n");
-                    }   
-                    break;
-                case 6: 
-                    printf("\nCriptomoedas disponiveis para vender\n");
-                    printf("B -> Bitcoin\n");
-                    printf("E -> Ethereum\n");
-                    printf("R -> Ripple\n");
-
-                    printf("\nDigite qual criptomoeda deseja vender (B ou E ou R): ");
-                    scanf(" %c", &criptoDesejada);
-
-                    printf("\nDigite o valor que deseja vender na criptomoeda escolhida: ");
-                    scanf("%f", &valorVenda);
-
-                    printf("Digite sua Senha: ");
-                    scanf("%5s", senhaVerificacao); 
-
-                    if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1){
-                        VenderCripto(valorVenda, criptoDesejada, cpfDigitado);
-                    } else {
-                        printf("Senha incorreta\n");
-                    }
-                    break;
-                case 7: 
-                    bitcoin_atualizado = AtualizarCotacao(bitcoin_preco);
-                    ethereum_atualizado = AtualizarCotacao(ethereum_preco);
-                    ripple_atualizado = AtualizarCotacao(ripple_preco);
-
-                    printf("\nCotações atualizadas:\n");
-                    printf("Bitcoin: R$%.2f\n", bitcoin_atualizado);
-                    printf("Ethereum: R$%.2f\n", ethereum_atualizado);
-                    printf("Ripple: R$%.2f\n", ripple_atualizado);
-                    break;
-                case 0:
-                    printf("Saindo...\n"); 
-                    return 0;
-                default:
-                    printf("Opção inválida \n");
-                    break;
-        
+        if (logado == 1) {
+            printf("Login inválido. Tente novamente.\n");
+        }
     }
+
+    printf("Login realizado com sucesso!\n");
+
+    int opcao = 1;
+    while (opcao != 0) {
+        printf("\nMenu\n");
+        printf("\t1 - Consultar saldo\n");
+        printf("\t2 - Consultar extrato\n");
+        printf("\t3 - Depositar\n");
+        printf("\t4 - Sacar\n");
+        printf("\t5 - Comprar criptomoedas\n");
+        printf("\t6 - Vender criptomoedas\n");
+        printf("\t7 - Atualizar cotação da criptomoeda\n");
+        printf("\t0 - Sair\n");
+        printf("\nEscolha uma opção: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                saldo = ConsultarSaldo(cpfDigitado);
+                printf("%s", saldo);
+                free(saldo);
+                break;
+            case 2:
+                ConsultarExtrato(cpfDigitado);
+                break;
+            case 3:
+                printf("\nDigite o valor que deseja depositar em Reais: ");
+                scanf("%f", &valorDeposito);
+                if (valorDeposito > 0) {
+                    Depositar(valorDeposito, cpfDigitado);
+                    printf("Valor depositado!\n");
+                }
+                break;
+            case 4:
+                printf("\nDigite o valor que deseja sacar em Reais: ");
+                scanf("%f", &valorSaque);
+                printf("Digite sua Senha: ");
+                scanf("%5s", senhaVerificacao);
+                if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1) {
+                    Sacar(valorSaque, senhaDigitada, cpfDigitado);
+                } else {
+                    printf("Senha incorreta\n");
+                }
+                break;
+            case 5:
+                printf("\nCriptomoedas disponíveis para compra\n");
+                printf("B -> Bitcoin\n");
+                printf("E -> Ethereum\n");
+                printf("R -> Ripple\n");
+
+                printf("\nDigite qual criptomoeda deseja comprar (B, E ou R): ");
+                scanf(" %c", &criptoDesejada);
+
+                printf("\nDigite o valor que deseja comprar em Reais: ");
+                scanf("%f", &valorCompra);
+
+                printf("Digite sua Senha: ");
+                scanf("%5s", senhaVerificacao);
+
+                if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1) {
+                    CompraCripto(valorCompra, criptoDesejada, cpfDigitado);
+                } else {
+                    printf("Senha incorreta\n");
+                }
+                break;
+            case 6:
+                printf("\nCriptomoedas disponíveis para vender\n");
+                printf("B -> Bitcoin\n");
+                printf("E -> Ethereum\n");
+                printf("R -> Ripple\n");
+
+                printf("\nDigite qual criptomoeda deseja vender (B, E ou R): ");
+                scanf(" %c", &criptoDesejada);
+
+                printf("\nDigite o valor que deseja vender na criptomoeda escolhida: ");
+                scanf("%f", &valorVenda);
+
+                printf("Digite sua Senha: ");
+                scanf("%5s", senhaVerificacao);
+
+                if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1) {
+                    VenderCripto(valorVenda, criptoDesejada, cpfDigitado);
+                } else {
+                    printf("Senha incorreta\n");
+                }
+                break;
+            case 7:
+                bitcoin_atualizado = AtualizarCotacao(bitcoin_preco);
+                ethereum_atualizado = AtualizarCotacao(ethereum_preco);
+                ripple_atualizado = AtualizarCotacao(ripple_preco);
+
+                printf("\nCotações atualizadas:\n");
+                printf("Bitcoin: R$%.2f\n", bitcoin_atualizado);
+                printf("Ethereum: R$%.2f\n", ethereum_atualizado);
+                printf("Ripple: R$%.2f\n", ripple_atualizado);
+                break;
+            case 0:
+                printf("Saindo...\n");
+                break;
+            default:
+                printf("Opção inválida\n");
+                break;
+        }
     }
 
     return 0;
