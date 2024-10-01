@@ -14,14 +14,8 @@ O projeto Exchange de Criptomoedas tem o objetivo simular contas de usuários e 
 
 Ao iniciar o programa, o usuário deve informar seu CPF e senha para realizar o login. Em seguida, o sistema verifica se o CPF e a senha correspondem a um usuário registrado no arquivo usuarios.bin. Caso a autenticação seja bem-sucedida, o usuário terá acesso ao menu principal, onde poderá realizar as seguintes operações:
 
-Consultar saldo de reais, Bitcoin, Ethereum e Ripple na carteira de investimentos.
-Consultar extrato das operações realizadas na carteira de investimentos.
-Depositar reais na carteira de investimentos.
-Sacar reais da carteira de investimentos.
-Comprar criptomoedas, utilizando o saldo disponível.
-Vender criptomoedas, convertendo-as em reais.
-Atualizar a cotação das criptomoedas.
-Sair do progama.
+Ao digitar "1" o usuário pode visualizar o saldo de reais, Bitcoin, Ethereum e Ripple na carteira de investimentos. Digitando "2" o usuário pode consultar seu histórico de operações realizadas na carteira de investimentos. Digitando "3" pode-se depositar reais na carteira de investimentos. Digitando "4" permite o saque de reais da carteira de investimentos, desde que o valor de saque seja igual ou menor ao saldo na carteira. O "5" possibilita a compra de criptomoedas, utilizando o saldo disponível. O "6" permite a venda de criptomoedas, convertendo-as em reais. O "7" mostra ao usuário a cotação das criptomoedas atualizada. E por último, "8", o usuário finaliza a sessão no programa.
+
 
 Segue lista de usuários e suas respectivas senhas para que o login seja bem-sucedido:
 12345678901-1122
