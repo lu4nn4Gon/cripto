@@ -562,7 +562,6 @@ void ConsultarExtrato(char* cpfDigitado) {
         }
 
 
-            printf("\nTipo de Transação: %c\n", tipoTransacao);
             printf("Moeda: %s\n", nomeMoeda);
             printf("Valor: R$%.2f\n", valor);
             printf("Data e Hora: %02d/%02d/%04d %02d:%02d:%02d\n", dia, mes + 1, ano + 1900, hora, minuto, segundo);
