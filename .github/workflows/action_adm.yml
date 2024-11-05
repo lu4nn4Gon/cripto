@@ -1,0 +1,27 @@
+name: administrador
+
+on:
+  push:
+    branches:
+     - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install GCC
+      run: sudo apt install gcc
+
+    - name: Compile main.c
+      run: gcc administrador.c -o adm
+
+    - name: Archive compiled program
+      uses: actions/upload-artifact@v3
+      with:
+        name: compiled
+        path: ./adm
