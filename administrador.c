@@ -1,17 +1,22 @@
 #include <stdio.h>
 #include <string.h>
 
-float ValidaIgualdade(const char* stringOne, const char* stringTwo){
+typedef struct {
+    char cpf[12];
+    char senha[5];
+} Investidor;
+
+
+float ValidaIgualdade(const char* stringOne, const char* stringTwo) {
     int i = 0;
 
-    while(stringOne[i] != '\0' && stringTwo[i] != '\0'){
-
+    while (stringOne[i] != '\0' && stringTwo[i] != '\0') {
         if (stringOne[i] != stringTwo[i]) {
             return 0;
-        } i++;
+        }
+        i++;
     }
-   return 1; 
-    
+    return 1; 
 }
 
 int VerificaCPF(const char *cpfDigitado) {
@@ -40,8 +45,27 @@ int VerificaCPF(const char *cpfDigitado) {
     return 0;
 }
 
+int Cadastro(const char* cpfDigitado, const char* senhaDigitada) {
+    FILE *usuarios;
 
-int Login(char* cpfDigitado, char* senhaDigitada){
+    if (VerificaCPF(cpfDigitado) == 1) {
+        printf("CPF já cadastrado!\n");
+        return -1;
+    }
+
+    usuarios = fopen("usuarios.bin", "ab");
+    if (usuarios == NULL) {
+        return -1;
+    }
+    
+    fwrite(cpfDigitado, sizeof(char), 11, usuarios);  
+    fwrite(senhaDigitada, sizeof(char), 4, usuarios); 
+
+    fclose(usuarios);
+    return 0;
+}
+
+int Login(char* cpfDigitado, char* senhaDigitada) {
     FILE *usuarios;
     char cpf[12];
     char senha[5];
@@ -66,6 +90,7 @@ int main(void) {
     char cpfDigitado[12];
     char senhaDigitada[5];
     char senhaVerificacao[5];
+    char nomeDigitado[50];
 
     int logado = 1;  
 
@@ -87,13 +112,13 @@ int main(void) {
 
     int opcao = 1;
     while (opcao != 0) {
-         printf("\nMenu\n");
+        printf("\nMenu\n");
         printf("\t1 - Cadastrar novo investidor\n");
         printf("\t2 - Excluir investidor\n");
         printf("\t3 - Cadastrar criptomoeda\n");
         printf("\t4 - Excluir criptomoeda\n");
         printf("\t5 - Consultar saldo de um investidor\n");
-        printf("\t6 - Consultar extrado de um investidor\n");
+        printf("\t6 - Consultar extrato de um investidor\n");
         printf("\t7 - Atualizar cotação de criptomoedas\n");
         printf("\t0 - Sair\n");
         printf("\nEscolha uma opção: ");
@@ -104,19 +129,28 @@ int main(void) {
                 printf("Digite o CPF do investidor que deseja cadastrar: ");
                 scanf("%11s", cpfDigitado);
                 int a = VerificaCPF(cpfDigitado);
-                if (a==0){
-                    printf("Prosseguir cadastro");
-                } else if(a==-1){
+                if (a == 0) {
+                    printf("Digite a senha do investidor: ");
+                    scanf("%5s", senhaDigitada);
+                    printf("Digite o nome do investidor: ");
+                    scanf("%50s", nomeDigitado);
+                    int b = Cadastro(cpfDigitado, senhaDigitada);
+                    if (b == 0) {
+                        printf("Cadastro realizado com sucesso!\n");
+                    } else {
+                        printf("Erro ao realizar o cadastro!\n");
+                    }
+                } else if (a == -1) {
                     printf("Erro ao abrir arquivo!\n");
-                } else{
-                    printf("CPF já cadastrado!");
+                } else {
+                    printf("CPF já cadastrado!\n");
                 }
                 break;
             case 2:
                 printf("Excluindo investidor...");
                 break;
             case 3:
-               printf("Cadastrando criptomoeda...");
+                printf("Cadastrando criptomoeda...");
                 break;
             case 4:
                 printf("Excluindo criptomoeda...");
@@ -125,7 +159,7 @@ int main(void) {
                 printf("Consultando saldo de um investidor...");
                 break;
             case 6:
-                printf("Consultando extrado de um investidor...");
+                printf("Consultando extrato de um investidor...");
                 break;
             case 7:
                 printf("Atualizando cotação de criptomoedas...");
