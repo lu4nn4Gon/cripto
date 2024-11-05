@@ -59,9 +59,48 @@ int main(void) {
 
     int opcao = 1;
     while (opcao != 0) {
-        printf("\nMenu\n");
-        break;
+         printf("\nMenu\n");
+        printf("\t1 - Cadastrar novo investidor\n");
+        printf("\t2 - Excluir investidor\n");
+        printf("\t3 - Cadastrar criptomoeda\n");
+        printf("\t4 - Excluir criptomoeda\n");
+        printf("\t5 - Consultar saldo de um investidor\n");
+        printf("\t6 - Consultar extrado de um investidor\n");
+        printf("\t7 - Atualizar cotação de criptomoedas\n");
+        printf("\t0 - Sair\n");
+        printf("\nEscolha uma opção: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                printf("Cadastrando novo investidor...");
+                break;
+            case 2:
+                printf("Excluindo investidor...");
+                break;
+            case 3:
+               printf("Cadastrando criptomoeda...");
+                break;
+            case 4:
+                printf("Excluindo criptomoeda...");
+                break;
+            case 5:
+                printf("Consultando saldo de um investidor...");
+                break;
+            case 6:
+                printf("Consultando extrado de um investidor...");
+                break;
+            case 7:
+                printf("Atualizando cotação de criptomoedas...");
+                break;
+            case 0:
+                printf("Saindo...\n");
+                break;
+            default:
+                printf("Opção inválida\n");
+                break;
         }
+    }
 
     return 0;
 }
