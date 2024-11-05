@@ -1,6 +1,7 @@
 #include <stdio.h>
+#include <string.h>
 
-float ValidaIgualdade(char* stringOne, char* stringTwo){
+float ValidaIgualdade(const char* stringOne, const char* stringTwo){
     int i = 0;
 
     while(stringOne[i] != '\0' && stringTwo[i] != '\0'){
@@ -12,6 +13,33 @@ float ValidaIgualdade(char* stringOne, char* stringTwo){
    return 1; 
     
 }
+
+int VerificaCPF(const char *cpfDigitado) {
+    FILE *usuarios;
+    char cpf[12];
+    char senha[5];
+    
+    usuarios = fopen("usuarios.bin", "rb");
+    if (usuarios == NULL) {
+        return -1;
+    }
+    
+    // Verifica se o CPF já existe
+    while (fread(cpf, sizeof(char), 11, usuarios) == 11) {
+        cpf[11] = '\0';
+        fread(senha, sizeof(char), 4, usuarios); // Lê a senha associada ao CPF
+        senha[4] = '\0';
+        
+        if (ValidaIgualdade(cpf, cpfDigitado)) {
+            fclose(usuarios);
+            return 1;
+        }
+    }
+
+    fclose(usuarios);
+    return 0;
+}
+
 
 int Login(char* cpfDigitado, char* senhaDigitada){
     FILE *usuarios;
@@ -73,7 +101,16 @@ int main(void) {
 
         switch (opcao) {
             case 1:
-                printf("Cadastrando novo investidor...");
+                printf("Digite o CPF do investidor que deseja cadastrar: ");
+                scanf("%11s", cpfDigitado);
+                int a = VerificaCPF(cpfDigitado);
+                if (a==0){
+                    printf("Prosseguir cadastro");
+                } else if(a==-1){
+                    printf("Erro ao abrir arquivo!\n");
+                } else{
+                    printf("CPF já cadastrado!");
+                }
                 break;
             case 2:
                 printf("Excluindo investidor...");
