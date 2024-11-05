@@ -1,4 +1,4 @@
-name: criptomoeda
+name: investidor
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
       run: sudo apt install gcc
 
     - name: Compile main.c
-      run: gcc main.c -o cripto
+      run: gcc investidor.c -o cripto
 
     - name: Archive compiled program
       uses: actions/upload-artifact@v3
