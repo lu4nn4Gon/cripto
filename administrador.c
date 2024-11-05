@@ -1,29 +1,67 @@
 #include <stdio.h>
 
-int main() {
-    FILE *file = fopen("administradores.bin", "wb");
+float ValidaIgualdade(char* stringOne, char* stringTwo){
+    int i = 0;
+
+    while(stringOne[i] != '\0' && stringTwo[i] != '\0'){
+
+        if (stringOne[i] != stringTwo[i]) {
+            return 0;
+        } i++;
+    }
+   return 1; 
     
-    if (file == NULL) {
-        printf("Erro ao criar o arquivo.\n");
-        return 1;
+}
+
+int Login(char* cpfDigitado, char* senhaDigitada){
+    FILE *usuarios;
+    char cpf[12];
+    char senha[5];
+
+    usuarios = fopen("administradores.bin", "rb");
+
+    while (fread(cpf, sizeof(char), 11, usuarios) == 11 && fread(senha, sizeof(char), 4, usuarios) == 4) {
+        cpf[11] = '\0';   
+        senha[4] = '\0';  
+
+        if (ValidaIgualdade(cpf, cpfDigitado) && ValidaIgualdade(senha, senhaDigitada)) {
+            fclose(usuarios);
+            return 0; 
+        }
     }
 
-    char cpf1[] = "11122233344";
-    char senha1[] = "1234";     
-    
-    char cpf2[] = "55566677788";
-    char senha2[] = "9876";
+    fclose(usuarios);
+    return 1; 
+}
 
-    // primeiro administrador
-    fwrite(cpf1, sizeof(char), 11, file);
-    fwrite(senha1, sizeof(char), 4, file);
+int main(void) {
+    char cpfDigitado[12];
+    char senhaDigitada[5];
+    char senhaVerificacao[5];
 
-    // segundo administrador
-    fwrite(cpf2, sizeof(char), 11, file);
-    fwrite(senha2, sizeof(char), 4, file);
+    int logado = 1;  
 
-    fclose(file);
-    printf("Arquivo administradores.bin criado com sucesso.\n");
+    if (logado == 1) {
+        printf("\nDigite o CPF: ");
+        scanf("%11s", cpfDigitado);
+        printf("Digite a senha: ");
+        scanf("%5s", senhaDigitada);
+
+        logado = Login(cpfDigitado, senhaDigitada);
+
+        if (logado == 1) {
+            printf("Login inválido.\n");
+            return 1; 
+        } else {
+            printf("Login realizado com sucesso!\n");
+        }
+    }
+
+    int opcao = 1;
+    while (opcao != 0) {
+        printf("\nMenu\n");
+        break;
+        }
 
     return 0;
 }

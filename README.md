@@ -32,6 +32,10 @@ Segue lista de usuários e suas respectivas senhas para que o login seja bem-suc
 90123456789-8710
 01234567890-0901 
 
+Segue lista de administradores:
+CPF: 11122233344 - Senha: 1234
+CPF: 55566677788 - Senha: 9876
+
 ## Lista com os nomes e matrícula dos participantes do grupo
 - Luanna P. Gonçalves  22.124.044-3
 - Lucas Masashi Yamashiro  22.124.047-6
