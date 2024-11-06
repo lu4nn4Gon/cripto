@@ -29,9 +29,10 @@ int VerificaCPF(const char *cpfDigitado) {
         return -1;
     }
     
+    // Verifica se o CPF já existe
     while (fread(cpf, sizeof(char), 11, usuarios) == 11) {
         cpf[11] = '\0';
-        fread(senha, sizeof(char), 4, usuarios); 
+        fread(senha, sizeof(char), 4, usuarios); // Lê a senha associada ao CPF
         senha[4] = '\0';
         
         if (ValidaIgualdade(cpf, cpfDigitado)) {
@@ -137,6 +138,48 @@ int Excluir(char* cpfDigitado) {
     }
 }
 
+char *ExibirInformacoesInvestidor(const char *cpfDigitado) {
+    FILE *usuarios;
+    FILE *nomes;
+    char cpf[12];
+    char senha[5];
+    char nome[50];
+    static char resultado[200];  
+
+    usuarios = fopen("usuarios.bin", "rb");
+    nomes = fopen("nomes.bin", "rb");
+
+    if (usuarios == NULL || nomes == NULL) {
+        snprintf(resultado, sizeof(resultado), "Erro ao abrir arquivos!\n");
+        return resultado;
+    }
+
+    while (fread(cpf, sizeof(char), 11, usuarios) == 11 && fread(senha, sizeof(char), 4, usuarios) == 4) {
+        cpf[11] = '\0';
+        senha[4] = '\0';
+
+        if (ValidaIgualdade(cpf, cpfDigitado)) {
+            while (fread(cpf, sizeof(char), 11, nomes) == 11 && fread(nome, sizeof(char), 49, nomes) == 49) {
+                cpf[11] = '\0';
+                nome[49] = '\0';
+                
+                if (ValidaIgualdade(cpf, cpfDigitado)) {
+                    snprintf(resultado, sizeof(resultado), 
+                             "Informações do Investidor:\nCPF: %s\nSenha: %s\nNome: %s\n", 
+                             cpf, senha, nome);
+                    fclose(usuarios);
+                    fclose(nomes);
+                    return resultado;
+                }
+            }
+        }
+    }
+
+    fclose(usuarios);
+    fclose(nomes);
+    snprintf(resultado, sizeof(resultado), "Investidor não encontrado.\n");
+    return resultado;
+}
 
 
 int Login(char* cpfDigitado, char* senhaDigitada) {
@@ -222,15 +265,16 @@ int main(void) {
                 }
                 break;
             case 2: {
-                char confirmacao;
+                char confirmacao;  
                 printf("\nDigite o CPF do investidor que deseja excluir: ");
                 scanf("%11s", cpfDigitado);
                 int c = VerificaCPF(cpfDigitado);
                 if (c == 1) {
+                    char *info = ExibirInformacoesInvestidor(cpfDigitado);
                     printf("----------------------------------\n");
-                    printf("informacoes usuario");
+                    printf("%s", info);
                     
-                    printf("/nDeseja excluir esse investidor? (S/N): ");
+                    printf("\nDeseja excluir esse investidor? (S/N): ");
                     scanf(" %c", &confirmacao);  
 
                     if (confirmacao == 'S' || confirmacao == 's') {
