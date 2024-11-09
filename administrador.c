@@ -13,7 +13,27 @@ typedef struct {
     float taxaVenda;
 } Criptomoeda;
 
+void ExibirCriptomoedas() {
+    FILE *arquivo;
+    Criptomoeda cripto;
+    
+    arquivo = fopen("criptomoedas.bin", "rb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de criptomoedas!\n");
+        return;
+    }
 
+    printf("\nLista de Criptomoedas Cadastradas:\n");
+    while (fread(&cripto, sizeof(Criptomoeda), 1, arquivo) == 1) {
+        printf("\nNome: %s\n", cripto.nome);
+        printf("Cotação Inicial: %.2f\n", cripto.cotacaoInicial);
+        printf("Taxa de Compra: %.2f\n", cripto.taxaCompra);
+        printf("Taxa de Venda: %.2f\n", cripto.taxaVenda);
+        printf("----------------------------------\n");
+    }
+
+    fclose(arquivo);
+}
 
 int CadastrarCriptomoeda(const char* nome, float cotacaoInicial, float taxaCompra, float taxaVenda) {
     FILE *arquivo;
@@ -335,16 +355,18 @@ int main(void) {
             }
 
             case 3:
-                printf("\nDigite o nome da criptomoeda: ");
-                scanf("%50s", nomeCripto);
-                printf("Digite a cotação inicial da criptomoeda: ");
-                scanf("%f", &cotacaoInicial);
-                printf("Digite a taxa de compra: ");
-                scanf("%f", &taxaCompra);
-                printf("Digite a taxa de venda: ");
-                scanf("%f", &taxaVenda);
+                // printf("\nDigite o nome da criptomoeda: ");
+                // scanf("%50s", nomeCripto);
+                // printf("Digite a cotação inicial da criptomoeda: ");
+                // scanf("%f", &cotacaoInicial);
+                // printf("Digite a taxa de compra: ");
+                // scanf("%f", &taxaCompra);
+                // printf("Digite a taxa de venda: ");
+                // scanf("%f", &taxaVenda);
 
-                CadastrarCriptomoeda(nomeCripto, cotacaoInicial, taxaCompra, taxaVenda);
+                // CadastrarCriptomoeda(nomeCripto, cotacaoInicial, taxaCompra, taxaVenda);
+                // break;
+                ExibirCriptomoedas();
                 break;
             case 4:
                 printf("Excluindo criptomoeda...");
