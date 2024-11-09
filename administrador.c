@@ -6,6 +6,86 @@ typedef struct {
     char senha[5];
 } Investidor;
 
+typedef struct {
+    char nome[50];
+    float cotacaoInicial;
+    float taxaCompra;
+    float taxaVenda;
+} Criptomoeda;
+
+int VerificaCriptomoeda(const char* nome) {
+    FILE *arquivo;
+    Criptomoeda cripto;
+
+    arquivo = fopen("criptomoedas.bin", "rb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de criptomoedas!\n");
+        return -1;
+    }
+
+    // Verificar se a criptomoeda já está cadastrada
+    while (fread(&cripto, sizeof(Criptomoeda), 1, arquivo) == 1) {
+        if (strcmp(cripto.nome, nome) == 0) {
+            fclose(arquivo);
+            return 1; 
+        }
+    }
+
+    fclose(arquivo);
+    return 0; 
+}
+
+void ExibirCriptomoedas() {
+    FILE *arquivo;
+    Criptomoeda cripto;
+    
+    arquivo = fopen("criptomoedas.bin", "rb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de criptomoedas!\n");
+        return;
+    }
+
+    printf("\nLista de Criptomoedas Cadastradas:\n");
+    while (fread(&cripto, sizeof(Criptomoeda), 1, arquivo) == 1) {
+        printf("\nNome: %s\n", cripto.nome);
+        printf("Cotação Inicial: %.2f\n", cripto.cotacaoInicial);
+        printf("Taxa de Compra: %.2f\n", cripto.taxaCompra);
+        printf("Taxa de Venda: %.2f\n", cripto.taxaVenda);
+        printf("----------------------------------\n");
+    }
+
+    fclose(arquivo);
+}
+
+int CadastrarCriptomoeda(const char* nome, float cotacaoInicial, float taxaCompra, float taxaVenda) {
+    FILE *arquivo;
+    Criptomoeda novaCripto;
+
+    if (VerificaCriptomoeda(nome) == 1) {
+        printf("Criptomoeda já está cadastrada!\n");
+        return -1;  
+    }
+
+    strncpy(novaCripto.nome, nome, sizeof(novaCripto.nome) - 1);
+    novaCripto.cotacaoInicial = cotacaoInicial;
+    novaCripto.taxaCompra = taxaCompra;
+    novaCripto.taxaVenda = taxaVenda;
+
+    arquivo = fopen("criptomoedas.bin", "ab");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de criptomoedas!\n");
+        return -1;
+    }
+
+
+    fwrite(&novaCripto, sizeof(Criptomoeda), 1, arquivo);
+    fclose(arquivo);
+
+    printf("Criptomoeda cadastrada com sucesso!\n");
+    return 0;
+}
+
+
 
 float ValidaIgualdade(const char* stringOne, const char* stringTwo) {
     int i = 0;
@@ -16,8 +96,10 @@ float ValidaIgualdade(const char* stringOne, const char* stringTwo) {
         }
         i++;
     }
-    return 1; 
+   return 1; 
+    
 }
+
 
 int VerificaCPF(const char *cpfDigitado) {
     FILE *usuarios;
@@ -29,10 +111,9 @@ int VerificaCPF(const char *cpfDigitado) {
         return -1;
     }
     
-    // Verifica se o CPF já existe
     while (fread(cpf, sizeof(char), 11, usuarios) == 11) {
         cpf[11] = '\0';
-        fread(senha, sizeof(char), 4, usuarios); // Lê a senha associada ao CPF
+        fread(senha, sizeof(char), 4, usuarios); 
         senha[4] = '\0';
         
         if (ValidaIgualdade(cpf, cpfDigitado)) {
@@ -182,7 +263,8 @@ char *ExibirInformacoesInvestidor(const char *cpfDigitado) {
 }
 
 
-int Login(char* cpfDigitado, char* senhaDigitada) {
+
+int Login(char* cpfDigitado, char* senhaDigitada){
     FILE *usuarios;
     char cpf[12];
     char senha[5];
@@ -209,6 +291,8 @@ int main(void) {
     char senhaDigitada[5];
     char senhaVerificacao[5];
     char nomeDigitado[50];
+    char nomeCripto[50];
+    float cotacaoInicial, taxaCompra, taxaVenda;
 
     int logado = 1;  
 
@@ -297,7 +381,17 @@ int main(void) {
             }
 
             case 3:
-                printf("Cadastrando criptomoeda...");
+                // ExibirCriptomoedas();
+                printf("\nDigite o nome da criptomoeda: ");
+                scanf("%50s", nomeCripto);
+                printf("Digite a cotação inicial da criptomoeda: ");
+                scanf("%f", &cotacaoInicial);
+                printf("Digite a taxa de compra: ");
+                scanf("%f", &taxaCompra);
+                printf("Digite a taxa de venda: ");
+                scanf("%f", &taxaVenda);
+
+                CadastrarCriptomoeda(nomeCripto, cotacaoInicial, taxaCompra, taxaVenda);
                 break;
             case 4:
                 printf("Excluindo criptomoeda...");
