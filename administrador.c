@@ -13,6 +13,28 @@ typedef struct {
     float taxaVenda;
 } Criptomoeda;
 
+int VerificaCriptomoeda(const char* nome) {
+    FILE *arquivo;
+    Criptomoeda cripto;
+
+    arquivo = fopen("criptomoedas.bin", "rb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de criptomoedas!\n");
+        return -1;
+    }
+
+    // Verificar se a criptomoeda já está cadastrada
+    while (fread(&cripto, sizeof(Criptomoeda), 1, arquivo) == 1) {
+        if (strcmp(cripto.nome, nome) == 0) {
+            fclose(arquivo);
+            return 1; 
+        }
+    }
+
+    fclose(arquivo);
+    return 0; 
+}
+
 void ExibirCriptomoedas() {
     FILE *arquivo;
     Criptomoeda cripto;
@@ -39,6 +61,10 @@ int CadastrarCriptomoeda(const char* nome, float cotacaoInicial, float taxaCompr
     FILE *arquivo;
     Criptomoeda novaCripto;
 
+    if (VerificaCriptomoeda(nome) == 1) {
+        printf("Criptomoeda já está cadastrada!\n");
+        return -1;  
+    }
 
     strncpy(novaCripto.nome, nome, sizeof(novaCripto.nome) - 1);
     novaCripto.cotacaoInicial = cotacaoInicial;
@@ -355,19 +381,19 @@ int main(void) {
             }
 
             case 3:
-                // printf("\nDigite o nome da criptomoeda: ");
-                // scanf("%50s", nomeCripto);
-                // printf("Digite a cotação inicial da criptomoeda: ");
-                // scanf("%f", &cotacaoInicial);
-                // printf("Digite a taxa de compra: ");
-                // scanf("%f", &taxaCompra);
-                // printf("Digite a taxa de venda: ");
-                // scanf("%f", &taxaVenda);
+                printf("\nDigite o nome da criptomoeda: ");
+                scanf("%50s", nomeCripto);
+                printf("Digite a cotação inicial da criptomoeda: ");
+                scanf("%f", &cotacaoInicial);
+                printf("Digite a taxa de compra: ");
+                scanf("%f", &taxaCompra);
+                printf("Digite a taxa de venda: ");
+                scanf("%f", &taxaVenda);
 
-                // CadastrarCriptomoeda(nomeCripto, cotacaoInicial, taxaCompra, taxaVenda);
-                // break;
-                ExibirCriptomoedas();
+                CadastrarCriptomoeda(nomeCripto, cotacaoInicial, taxaCompra, taxaVenda);
                 break;
+                // ExibirCriptomoedas();
+                // break;
             case 4:
                 printf("Excluindo criptomoeda...");
                 break;
