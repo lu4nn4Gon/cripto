@@ -45,8 +45,9 @@ int VerificaCPF(const char *cpfDigitado) {
     return 0;
 }
 
-int Cadastro(const char* cpfDigitado, const char* senhaDigitada) {
+int Cadastro(const char* cpfDigitado, const char* senhaDigitada, char* nomeDigitado) {
     FILE *usuarios;
+    FILE *nomes;
 
     if (VerificaCPF(cpfDigitado) == 1) {
         printf("CPF já cadastrado!\n");
@@ -61,9 +62,125 @@ int Cadastro(const char* cpfDigitado, const char* senhaDigitada) {
     fwrite(cpfDigitado, sizeof(char), 11, usuarios);  
     fwrite(senhaDigitada, sizeof(char), 4, usuarios); 
 
+
     fclose(usuarios);
+
+    nomes = fopen("nomes.bin", "ab");
+    if (usuarios == NULL) {
+        return -1;
+    }
+
+    fwrite(cpfDigitado, sizeof(char), 11, nomes);
+    fwrite(nomeDigitado, sizeof(char), 49, nomes);  
+
+    fclose(nomes);
+
+
     return 0;
 }
+
+int Excluir(char* cpfDigitado) {
+    FILE *usuarios, *usuariosTemp, *nomes, *nomesTemp;
+    char cpf[12];
+    char senha[5];
+    int encontrado = 0;
+
+    usuarios = fopen("usuarios.bin", "rb");
+    usuariosTemp = fopen("usuarios_temp.bin", "wb");
+    if (usuarios == NULL || usuariosTemp == NULL) {
+        return -1;
+    }
+
+    while (fread(cpf, sizeof(char), 11, usuarios) == 11 && fread(senha, sizeof(char), 4, usuarios) == 4) {
+        cpf[11] = '\0';
+        senha[4] = '\0';
+
+        if (ValidaIgualdade(cpf, cpfDigitado) == 0) {
+            fwrite(cpf, sizeof(char), 11, usuariosTemp);
+            fwrite(senha, sizeof(char), 4, usuariosTemp);
+        } else {
+            encontrado = 1;
+        }
+    }
+
+    fclose(usuarios);
+    fclose(usuariosTemp);
+
+    remove("usuarios.bin");
+    rename("usuarios_temp.bin", "usuarios.bin");
+
+    nomes = fopen("nomes.bin", "rb");
+    nomesTemp = fopen("nomes_temp.bin", "wb");
+    if (nomes == NULL || nomesTemp == NULL) {
+        return -1;
+    }
+
+    char nome[50];
+    while (fread(cpf, sizeof(char), 11, nomes) == 11 && fread(nome, sizeof(char), 49, nomes) == 49) {
+        cpf[11] = '\0';
+
+        if (ValidaIgualdade(cpf, cpfDigitado) == 0) {
+            fwrite(cpf, sizeof(char), 11, nomesTemp);
+            fwrite(nome, sizeof(char), 49, nomesTemp);
+        }
+    }
+
+    fclose(nomes);
+    fclose(nomesTemp);
+
+    remove("nomes.bin");
+    rename("nomes_temp.bin", "nomes.bin");
+
+    if (encontrado) {
+        return 0;
+    } else {
+        return -2 ;
+    }
+}
+
+char *ExibirInformacoesInvestidor(const char *cpfDigitado) {
+    FILE *usuarios;
+    FILE *nomes;
+    char cpf[12];
+    char senha[5];
+    char nome[50];
+    static char resultado[200];  
+
+    usuarios = fopen("usuarios.bin", "rb");
+    nomes = fopen("nomes.bin", "rb");
+
+    if (usuarios == NULL || nomes == NULL) {
+        snprintf(resultado, sizeof(resultado), "Erro ao abrir arquivos!\n");
+        return resultado;
+    }
+
+    while (fread(cpf, sizeof(char), 11, usuarios) == 11 && fread(senha, sizeof(char), 4, usuarios) == 4) {
+        cpf[11] = '\0';
+        senha[4] = '\0';
+
+        if (ValidaIgualdade(cpf, cpfDigitado)) {
+            while (fread(cpf, sizeof(char), 11, nomes) == 11 && fread(nome, sizeof(char), 49, nomes) == 49) {
+                cpf[11] = '\0';
+                nome[49] = '\0';
+                
+                if (ValidaIgualdade(cpf, cpfDigitado)) {
+                    snprintf(resultado, sizeof(resultado), 
+                             "Informações do Investidor:\nCPF: %s\nSenha: %s\nNome: %s\n", 
+                             cpf, senha, nome);
+                    fclose(usuarios);
+                    fclose(nomes);
+                    return resultado;
+                }
+            }
+        }
+    }
+
+    fclose(usuarios);
+    fclose(nomes);
+    snprintf(resultado, sizeof(resultado), "Investidor não encontrado.\n");
+    return resultado;
+}
+
 
 int Login(char* cpfDigitado, char* senhaDigitada) {
     FILE *usuarios;
@@ -85,6 +202,7 @@ int Login(char* cpfDigitado, char* senhaDigitada) {
     fclose(usuarios);
     return 1; 
 }
+
 
 int main(void) {
     char cpfDigitado[12];
@@ -126,7 +244,7 @@ int main(void) {
 
         switch (opcao) {
             case 1:
-                printf("Digite o CPF do investidor que deseja cadastrar: ");
+                printf("\nDigite o CPF do investidor que deseja cadastrar: ");
                 scanf("%11s", cpfDigitado);
                 int a = VerificaCPF(cpfDigitado);
                 if (a == 0) {
@@ -134,7 +252,7 @@ int main(void) {
                     scanf("%5s", senhaDigitada);
                     printf("Digite o nome do investidor: ");
                     scanf("%50s", nomeDigitado);
-                    int b = Cadastro(cpfDigitado, senhaDigitada);
+                    int b = Cadastro(cpfDigitado, senhaDigitada, nomeDigitado);
                     if (b == 0) {
                         printf("Cadastro realizado com sucesso!\n");
                     } else {
@@ -146,9 +264,38 @@ int main(void) {
                     printf("CPF já cadastrado!\n");
                 }
                 break;
-            case 2:
-                printf("Excluindo investidor...");
+            case 2: {
+                char confirmacao;  
+                printf("\nDigite o CPF do investidor que deseja excluir: ");
+                scanf("%11s", cpfDigitado);
+                int c = VerificaCPF(cpfDigitado);
+                if (c == 1) {
+                    char *info = ExibirInformacoesInvestidor(cpfDigitado);
+                    printf("----------------------------------\n");
+                    printf("%s", info);
+                    
+                    printf("\nDeseja excluir esse investidor? (S/N): ");
+                    scanf(" %c", &confirmacao);  
+
+                    if (confirmacao == 'S' || confirmacao == 's') {
+                        if (Excluir(cpfDigitado) == 0) {  
+                            printf("Investidor excluído com sucesso!\n");
+                        } else {
+                            printf("Erro ao excluir investidor!\n");
+                        }
+                    } else if (confirmacao == 'N' || confirmacao == 'n') {
+                        printf("Processo cancelado!\n");
+                    } else {
+                        printf("Opção inválida\n");
+                    }
+                } else if (c == -1) {
+                    printf("Erro ao abrir arquivo!\n");
+                } else {
+                    printf("CPF não tem cadastro!\n");
+                }
                 break;
+            }
+
             case 3:
                 printf("Cadastrando criptomoeda...");
                 break;
