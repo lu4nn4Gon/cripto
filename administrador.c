@@ -381,6 +381,7 @@ int main(void) {
             }
 
             case 3:
+                // ExibirCriptomoedas();
                 printf("\nDigite o nome da criptomoeda: ");
                 scanf("%50s", nomeCripto);
                 printf("Digite a cotação inicial da criptomoeda: ");
@@ -392,8 +393,6 @@ int main(void) {
 
                 CadastrarCriptomoeda(nomeCripto, cotacaoInicial, taxaCompra, taxaVenda);
                 break;
-                // ExibirCriptomoedas();
-                // break;
             case 4:
                 printf("Excluindo criptomoeda...");
                 break;
