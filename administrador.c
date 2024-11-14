@@ -343,6 +343,7 @@ void ConsultarExtrato(char* cpfDigitado) {
     float valor;
     int dia, mes, ano, hora, minuto, segundo;
     char* nomeMoeda;
+    int transacoesEncontradas = 0;  // Variável para verificar se existem transações
 
     extrato = fopen("extrato.bin", "rb");
     if (extrato == NULL) {
@@ -365,6 +366,8 @@ void ConsultarExtrato(char* cpfDigitado) {
         fread(&segundo, sizeof(int), 1, extrato);
 
         if (ValidaIgualdade(cpf, cpfDigitado)) {
+            transacoesEncontradas = 1;  // Marcar que foi encontrada uma transação para o CPF
+
             if (moeda == 'C') {
                 nomeMoeda = "Reais";
             } else if (moeda == 'B') {
@@ -375,12 +378,11 @@ void ConsultarExtrato(char* cpfDigitado) {
                 nomeMoeda = "Ripple";
             } 
 
-        if (tipoTransacao == 'D') {
-            printf("\nTipo de Transação: Depósito\n");
-        } else {
-            printf("\nTipo de Transação: Saque\n");
-        }
-
+            if (tipoTransacao == 'D') {
+                printf("\nTipo de Transação: Depósito\n");
+            } else {
+                printf("\nTipo de Transação: Saque\n");
+            }
 
             printf("Moeda: %s\n", nomeMoeda);
             printf("Valor: R$%.2f\n", valor);
@@ -390,7 +392,13 @@ void ConsultarExtrato(char* cpfDigitado) {
     }
 
     fclose(extrato);
+
+    // Verificar se nenhuma transação foi encontrada
+    if (!transacoesEncontradas) {
+        printf("Nenhuma transação encontrada para o CPF %s.\n", cpfDigitado);
+    }
 }
+
 
 
 int Login(char* cpfDigitado, char* senhaDigitada){
