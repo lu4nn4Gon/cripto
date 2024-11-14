@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
 
 typedef struct {
     char cpf[12];
@@ -13,6 +15,38 @@ typedef struct {
     float taxaVenda;
 } Criptomoeda;
 
+
+// a mesma função do programa do investidor.
+float AtualizarCotacao(float valorAtual) {
+    float variacao = ((rand() % 11) - 5) * (5.0 / 100.0);
+    float novaCotacao = valorAtual + (valorAtual * variacao);
+    return novaCotacao;
+}
+
+void AtualizarCotacoesCriptomoedas() {
+    FILE *arquivo = fopen("criptomoedas.bin", "rb+");
+    Criptomoeda cripto;
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de criptomoedas!\n");
+        return;
+    }
+
+    while (fread(&cripto, sizeof(Criptomoeda), 1, arquivo) == 1) {
+        float novaCotacao = AtualizarCotacao(cripto.cotacaoInicial);
+        cripto.cotacaoInicial = novaCotacao;
+
+        fseek(arquivo, -sizeof(Criptomoeda), SEEK_CUR);
+        fwrite(&cripto, sizeof(Criptomoeda), 1, arquivo);
+
+        printf("Criptomoeda: %s\nNova Cotação: %.2f\n", cripto.nome, cripto.cotacaoInicial);
+        printf("----------------------------------\n");
+    }
+
+    fclose(arquivo);
+    printf("Cotações de todas as criptomoedas atualizadas com sucesso!\n");
+}
+
 int VerificaCriptomoeda(const char* nome) {
     FILE *arquivo;
     Criptomoeda cripto;
@@ -23,7 +57,6 @@ int VerificaCriptomoeda(const char* nome) {
         return -1;
     }
 
-    // Verificar se a criptomoeda já está cadastrada
     while (fread(&cripto, sizeof(Criptomoeda), 1, arquivo) == 1) {
         if (strcmp(cripto.nome, nome) == 0) {
             fclose(arquivo);
@@ -472,7 +505,8 @@ int main(void) {
                 printf("Consultando extrato de um investidor...");
                 break;
             case 7:
-                printf("Atualizando cotação de criptomoedas...");
+                printf("\nAtualizando cotações de todas as criptomoedas...\n");
+                AtualizarCotacoesCriptomoedas();
                 break;
             case 0:
                 printf("Saindo...\n");
