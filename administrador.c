@@ -16,6 +16,7 @@ typedef struct {
 } Criptomoeda;
 
 
+
 // a mesma função do programa do investidor.
 float AtualizarCotacao(float valorAtual) {
     float variacao = ((rand() % 11) - 5) * (5.0 / 100.0);
@@ -334,6 +335,64 @@ char *ExibirInformacoesInvestidor(const char *cpfDigitado) {
 
 
 
+void ConsultarExtrato(char* cpfDigitado) {
+    FILE *extrato;
+    char cpf[12];
+    char tipoTransacao;
+    char moeda;
+    float valor;
+    int dia, mes, ano, hora, minuto, segundo;
+    char* nomeMoeda;
+
+    extrato = fopen("extrato.bin", "rb");
+    if (extrato == NULL) {
+        printf("Erro ao abrir o arquivo de extrato.\n");
+        return;
+    }
+
+    printf("\nExtrato de transações para o CPF: %s\n", cpfDigitado);
+
+    while (fread(&tipoTransacao, sizeof(char), 1, extrato) == 1) {
+        fread(&moeda, sizeof(char), 1, extrato);
+        fread(cpf, sizeof(char), 11, extrato);
+        cpf[11] = '\0';
+        fread(&valor, sizeof(float), 1, extrato);
+        fread(&dia, sizeof(int), 1, extrato);
+        fread(&mes, sizeof(int), 1, extrato);
+        fread(&ano, sizeof(int), 1, extrato);
+        fread(&hora, sizeof(int), 1, extrato);
+        fread(&minuto, sizeof(int), 1, extrato);
+        fread(&segundo, sizeof(int), 1, extrato);
+
+        if (ValidaIgualdade(cpf, cpfDigitado)) {
+            if (moeda == 'C') {
+                nomeMoeda = "Reais";
+            } else if (moeda == 'B') {
+                nomeMoeda = "Bitcoin";
+            } else if (moeda == 'E') {
+                nomeMoeda = "Ethereum";
+            } else if (moeda == 'R') {
+                nomeMoeda = "Ripple";
+            } 
+
+        if (tipoTransacao == 'D') {
+            printf("\nTipo de Transação: Depósito\n");
+        } else {
+            printf("\nTipo de Transação: Saque\n");
+        }
+
+
+            printf("Moeda: %s\n", nomeMoeda);
+            printf("Valor: R$%.2f\n", valor);
+            printf("Data e Hora: %02d/%02d/%04d %02d:%02d:%02d\n", dia, mes + 1, ano + 1900, hora, minuto, segundo);
+            printf("----------------------------------\n");
+        }
+    }
+
+    fclose(extrato);
+}
+
+
 int Login(char* cpfDigitado, char* senhaDigitada){
     FILE *usuarios;
     char cpf[12];
@@ -502,8 +561,11 @@ int main(void) {
                 printf("Consultando saldo de um investidor...");
                 break;
             case 6:
-                printf("Consultando extrato de um investidor...");
+                printf("\nDigite o CPF do investidor para consultar o extrato: ");
+                scanf("%11s", cpfDigitado);  
+                ConsultarExtrato(cpfDigitado); 
                 break;
+
             case 7:
                 printf("\nAtualizando cotações de todas as criptomoedas...\n");
                 AtualizarCotacoesCriptomoedas();
