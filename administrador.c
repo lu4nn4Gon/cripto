@@ -85,6 +85,38 @@ int CadastrarCriptomoeda(const char* nome, float cotacaoInicial, float taxaCompr
     return 0;
 }
 
+int ExcluirCriptomoeda(const char* nomeCripto) {
+    FILE *arquivo, *arquivoTemp;
+    Criptomoeda cripto;
+    int encontrado = 0;
+
+    arquivo = fopen("criptomoedas.bin", "rb");
+    arquivoTemp = fopen("criptomoedas_temp.bin", "wb");
+    if (arquivo == NULL || arquivoTemp == NULL) {
+        printf("Erro ao abrir o arquivo de criptomoedas!\n");
+        return -1;
+    }
+
+    while (fread(&cripto, sizeof(Criptomoeda), 1, arquivo) == 1) {
+        if (strcmp(cripto.nome, nomeCripto) != 0) {
+            fwrite(&cripto, sizeof(Criptomoeda), 1, arquivoTemp);
+        } else {
+            encontrado = 1;
+        }
+    }
+
+    fclose(arquivo);
+    fclose(arquivoTemp);
+
+    remove("criptomoedas.bin");
+    rename("criptomoedas_temp.bin", "criptomoedas.bin");
+
+    if (encontrado) {
+        return 0;
+    } else {
+        return -2;
+    }
+}
 
 
 float ValidaIgualdade(const char* stringOne, const char* stringTwo) {
@@ -394,8 +426,18 @@ int main(void) {
                 CadastrarCriptomoeda(nomeCripto, cotacaoInicial, taxaCompra, taxaVenda);
                 break;
             case 4:
-                printf("Excluindo criptomoeda...");
+                printf("\nDigite o nome da criptomoeda que deseja excluir: ");
+                scanf("%49s", nomeCripto);
+                int resultado = ExcluirCriptomoeda(nomeCripto);
+                if (resultado == 0) {
+                    printf("Criptomoeda excluída com sucesso!\n");
+                } else if (resultado == -2) {
+                    printf("Criptomoeda não encontrada!\n");
+                } else {
+                    printf("Erro ao excluir criptomoeda!\n");
+                }
                 break;
+
             case 5:
                 printf("Consultando saldo de um investidor...");
                 break;
