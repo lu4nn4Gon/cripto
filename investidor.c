@@ -34,6 +34,28 @@ void ListarCriptomoedas() {
 }
 
 
+int BuscarCriptomoeda(const char *nomeCripto, Criptomoeda *cripto) {
+    FILE *arquivo = fopen("criptomoedas.bin", "rb");
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de criptomoedas!\n");
+        return 0;
+    }
+
+    while (fread(cripto, sizeof(Criptomoeda), 1, arquivo) == 1) {
+        if (strcmp(cripto->nome, nomeCripto) == 0) {
+            fclose(arquivo);
+            return 1;  
+        }
+    }
+
+    fclose(arquivo);
+    return 0;  
+}
+
+
+
+
 float AtualizarCotacao(float valorAtual) {
 
     float variacao = ((rand() % 11) - 5) * (5.0 / 100.0);
@@ -603,6 +625,18 @@ int main(void) {
             case 5:
                 printf("\nCriptomoedas disponíveis:\n");
                 ListarCriptomoedas();
+                printf("\nDigite o nome da criptomoeda que deseja comprar: ");
+                scanf("%s", nomeCripto);
+                Criptomoeda cripto;
+                if (BuscarCriptomoeda(nomeCripto, &cripto)) {
+                    printf("\nCriptomoeda encontrada:\n");
+                    printf("Nome: %s\n", cripto.nome);
+                    printf("Cotação Atual: R$%.2f\n", cripto.cotacaoInicial);
+                    printf("Taxa de Compra: %.2f%%\n", cripto.taxaCompra * 100);
+                    printf("Taxa de Venda: %.2f%%\n", cripto.taxaVenda * 100);
+                } else {
+                    printf("Criptomoeda '%s' não encontrada!\n", nomeCripto);
+                }
                 break;
 
             case 6:
