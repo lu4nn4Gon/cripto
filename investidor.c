@@ -3,6 +3,36 @@
 #include <string.h>
 #include <time.h>
 
+typedef struct {
+    char nome[50];
+    float cotacaoInicial;
+    float taxaCompra;
+    float taxaVenda;
+} Criptomoeda;
+
+
+
+void ListarCriptomoedas() {
+    FILE *arquivo = fopen("criptomoedas.bin", "rb");
+    Criptomoeda cripto;
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de criptomoedas!\n");
+        return;
+    }
+
+    printf("\nCriptomoedas disponíveis para compra:\n");
+    while (fread(&cripto, sizeof(Criptomoeda), 1, arquivo) == 1) {
+        printf("- Nome: %s\n", cripto.nome);
+        printf("  Cotação Atual: R$%.2f\n", cripto.cotacaoInicial);
+        printf("  Taxa de Compra: %.2f%%\n", cripto.taxaCompra * 100);
+        printf("  Taxa de Venda: %.2f%%\n", cripto.taxaVenda * 100);
+        printf("----------------------------------\n");
+    }
+
+    fclose(arquivo);
+}
+
 
 float AtualizarCotacao(float valorAtual) {
 
@@ -321,109 +351,8 @@ int Sacar(float valorSaque, char*senhaDigitada, char* cpfDigitado){
     return resultado;
 }
 
-float CompraCripto(float valorCompra, char criptoDesejada, char* cpfDigitado) {
-    float saldo = VerificaSaldo(cpfDigitado); 
-    FILE *extrato;
-    float taxa = 0.0;
-    float bitcoin_taxa = 2.0 / 100.0;
-    float etherium_taxa = 1.0 / 100.0;
-    float ripple_taxa = 1.0 / 100.0;
-    float resultado = 0.0;
-    char confirmacao;
-    float valorCripto = 0.0;
-    char *cripto_nome;
-    char tipoTransacaoReais = 'S';  
-    char moedaReais = 'C';
-    char tipoTransacaoCripto = 'D';
-    float bitcoinCotacao = 350000.0;
-    float ethereumCotacao = 14000.0;
-    float rippleCotacao = 3.20; 
+//refazer funcao compracripto
 
-    bitcoinCotacao = AtualizarCotacao(bitcoinCotacao);
-    ethereumCotacao = AtualizarCotacao(ethereumCotacao);
-    rippleCotacao = AtualizarCotacao(rippleCotacao);
-
-    extrato = fopen("extrato.bin", "ab");
-    if (extrato == NULL) {
-        printf("Erro ao abrir o arquivo de extrato.\n");
-        return 0;
-    }
-
-    if (saldo >= valorCompra) {
-
-        if (criptoDesejada == 'B'){
-            valorCripto = (valorCompra * (1 - bitcoin_taxa)) / bitcoinCotacao;
-            taxa = bitcoin_taxa;
-            cripto_nome = "Bitcoin"; 
-
-            printf("Você comprou Bitcoin no valor de R$%.5f\n", valorCompra);
-        } 
-        else if (criptoDesejada == 'E'){
-            valorCripto = (valorCompra * (1 - etherium_taxa)) / ethereumCotacao;
-            taxa = etherium_taxa;
-            cripto_nome = "Ethereum"; 
-
-            printf("Você comprou Ethereum no valor de R$%.3f\n", valorCompra);
-        } 
-        else if (criptoDesejada == 'R'){
-            valorCripto = (valorCompra * (1 - ripple_taxa)) / rippleCotacao;
-            taxa = ripple_taxa;
-            cripto_nome = "Ripple"; 
-
-            printf("Você comprou Ripple no valor de R$%.3f\n", valorCompra);
-        }  
-        else {
-            printf("Criptomoeda inválida!\n");
-            fclose(extrato);
-            return 0;
-        }
-
-        printf("\nVocê está prestes a comprar %.5f %s no valor de R$%.2f\n", valorCripto, cripto_nome, valorCompra);
-        printf("Taxa cobrada: %.2f%%\n", taxa * 100.0);
-        printf("Confirma a compra? (S/N): ");
-        scanf(" %c", &confirmacao);
-
-        time_t t = time(NULL);
-        struct tm tm = *localtime(&t);
-
-        if (confirmacao == 'S') {
-
-            // Registra a subtração do saldo em reais
-            fwrite(&tipoTransacaoReais, sizeof(char), 1, extrato);
-            fwrite(&moedaReais, sizeof(char), 1, extrato);
-            fwrite(cpfDigitado, sizeof(char), 11, extrato);
-            fwrite(&valorCompra, sizeof(float), 1, extrato);
-            fwrite(&tm.tm_mday, sizeof(int), 1, extrato);
-            fwrite(&tm.tm_mon, sizeof(int), 1, extrato);
-            fwrite(&tm.tm_year, sizeof(int), 1, extrato);
-            fwrite(&tm.tm_hour, sizeof(int), 1, extrato);
-            fwrite(&tm.tm_min, sizeof(int), 1, extrato);
-            fwrite(&tm.tm_sec, sizeof(int), 1, extrato);
-
-            // Registra a compra da criptomoeda
-            fwrite(&tipoTransacaoCripto, sizeof(char), 1, extrato);
-            fwrite(&criptoDesejada, sizeof(char), 1, extrato);
-            fwrite(cpfDigitado, sizeof(char), 11, extrato);
-            fwrite(&valorCripto, sizeof(float), 1, extrato);
-            fwrite(&tm.tm_mday, sizeof(int), 1, extrato);
-            fwrite(&tm.tm_mon, sizeof(int), 1, extrato);
-            fwrite(&tm.tm_year, sizeof(int), 1, extrato);
-            fwrite(&tm.tm_hour, sizeof(int), 1, extrato);
-            fwrite(&tm.tm_min, sizeof(int), 1, extrato);
-            fwrite(&tm.tm_sec, sizeof(int), 1, extrato);
-
-            fclose(extrato);  
-            printf("Compra realizada!\n");
-        } else {
-            printf("Compra cancelada.\n");
-        }
-    } else {
-        printf("Saldo insuficiente para a compra!\n");
-        fclose(extrato);
-        return 0;
-    }
-    return 0;
-}
 
 float VenderCripto(float valorVenda, char criptoDesejada, char* cpfDigitado) {
     float saldoCripto = 0.0;
@@ -609,6 +538,7 @@ int main(void) {
     srand(time(NULL));
     float saldo_bitcoin, saldo_etherium, saldo_ripple;
     char* saldo;
+    char nomeCripto[50];
 
     int logado = 1;  
 
@@ -671,26 +601,10 @@ int main(void) {
                 }
                 break;
             case 5:
-                printf("\nCriptomoedas disponíveis para compra\n");
-                printf("B -> Bitcoin\n");
-                printf("E -> Ethereum\n");
-                printf("R -> Ripple\n");
-
-                printf("\nDigite qual criptomoeda deseja comprar (B, E ou R): ");
-                scanf(" %c", &criptoDesejada);
-
-                printf("\nDigite o valor que deseja comprar em Reais: ");
-                scanf("%f", &valorCompra);
-
-                printf("Digite sua Senha: ");
-                scanf("%5s", senhaVerificacao);
-
-                if (ValidaIgualdade(senhaDigitada, senhaVerificacao) == 1) {
-                    CompraCripto(valorCompra, criptoDesejada, cpfDigitado);
-                } else {
-                    printf("Senha incorreta\n");
-                }
+                printf("\nCriptomoedas disponíveis:\n");
+                ListarCriptomoedas();
                 break;
+
             case 6:
                 printf("\nCriptomoedas disponíveis para vender\n");
                 printf("B -> Bitcoin\n");
