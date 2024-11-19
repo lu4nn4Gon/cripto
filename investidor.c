@@ -637,7 +637,7 @@ int main(void) {
         printf("\t4 - Sacar\n");
         printf("\t5 - Comprar criptomoedas\n");
         printf("\t6 - Vender criptomoedas\n");
-        printf("\t7 - Atualizar cotação da criptomoeda\n");
+        // printf("\t7 - Atualizar cotação da criptomoeda\n");
         printf("\t0 - Sair\n");
         printf("\nEscolha uma opção: ");
         scanf("%d", &opcao);
@@ -712,16 +712,16 @@ int main(void) {
                     printf("Senha incorreta\n");
                 }
                 break;
-            case 7:
-                bitcoin_atualizado = AtualizarCotacao(bitcoin_preco);
-                ethereum_atualizado = AtualizarCotacao(ethereum_preco);
-                ripple_atualizado = AtualizarCotacao(ripple_preco);
+            // case 7:
+            //     bitcoin_atualizado = AtualizarCotacao(bitcoin_preco);
+            //     ethereum_atualizado = AtualizarCotacao(ethereum_preco);
+            //     ripple_atualizado = AtualizarCotacao(ripple_preco);
 
-                printf("\nCotações atualizadas:\n");
-                printf("Bitcoin: R$%.2f\n", bitcoin_atualizado);
-                printf("Ethereum: R$%.2f\n", ethereum_atualizado);
-                printf("Ripple: R$%.2f\n", ripple_atualizado);
-                break;
+            //     printf("\nCotações atualizadas:\n");
+            //     printf("Bitcoin: R$%.2f\n", bitcoin_atualizado);
+            //     printf("Ethereum: R$%.2f\n", ethereum_atualizado);
+            //     printf("Ripple: R$%.2f\n", ripple_atualizado);
+            //     break;
             case 0:
                 printf("Saindo...\n");
                 break;
