@@ -16,6 +16,205 @@ typedef struct {
 } Criptomoeda;
 
 
+float ValidaIgualdade(const char* stringOne, const char* stringTwo) {
+    int i = 0;
+
+    while (stringOne[i] != '\0' && stringTwo[i] != '\0') {
+        if (stringOne[i] != stringTwo[i]) {
+            return 0;
+        }
+        i++;
+    }
+   return 1; 
+    
+}
+
+
+float VerificaSaldo(char* cpfDigitado) {
+    FILE *extrato;
+    char cpf[12];
+    char tipoTransacao;
+    char moeda;
+    float valor;
+    int dia, mes, ano, hora, minuto, segundo;
+    float saldo = 0.0;
+
+    extrato = fopen("extrato.bin", "rb");
+
+
+    while (fread(&tipoTransacao, sizeof(char), 1, extrato) == 1) {
+
+        fread(&moeda, sizeof(char), 1, extrato);
+
+        fread(cpf, sizeof(char), 11, extrato);
+        cpf[11] = '\0';  
+
+        fread(&valor, sizeof(float), 1, extrato);
+
+        fread(&dia, sizeof(int), 1, extrato);
+        fread(&mes, sizeof(int), 1, extrato);
+        fread(&ano, sizeof(int), 1, extrato);
+        fread(&hora, sizeof(int), 1, extrato);
+        fread(&minuto, sizeof(int), 1, extrato);
+        fread(&segundo, sizeof(int), 1, extrato);
+
+
+        if (ValidaIgualdade(cpf, cpfDigitado) && moeda == 'C') {
+            if (tipoTransacao == 'D') {
+                saldo = saldo + valor; 
+            } else if (tipoTransacao == 'S') {
+                saldo = saldo - valor;  
+            }
+        }
+    }
+
+    fclose(extrato);
+
+    return saldo; 
+
+}
+
+float VerificaSaldo_bitcoin(char* cpfDigitado) {
+    FILE *extrato;
+    char cpf[12];
+    char tipoTransacao;
+    char moeda;
+    float valor;
+    int dia, mes, ano, hora, minuto, segundo;
+
+    extrato = fopen("extrato.bin", "rb");
+
+    float saldo = 0.0;
+   
+    while (fread(&tipoTransacao, sizeof(char), 1, extrato) == 1) {
+        
+        fread(&moeda, sizeof(char), 1, extrato);
+
+        fread(cpf, sizeof(char), 11, extrato);
+        cpf[11] = '\0';  
+
+        fread(&valor, sizeof(float), 1, extrato);
+
+        fread(&dia, sizeof(int), 1, extrato);
+        fread(&mes, sizeof(int), 1, extrato);
+        fread(&ano, sizeof(int), 1, extrato);
+        fread(&hora, sizeof(int), 1, extrato);
+        fread(&minuto, sizeof(int), 1, extrato);
+        fread(&segundo, sizeof(int), 1, extrato);
+
+        if (ValidaIgualdade(cpf, cpfDigitado) && moeda == 'B') {
+            if (tipoTransacao == 'D') {  
+                saldo = saldo + valor;
+            } else if (tipoTransacao == 'S') {  
+                saldo = saldo - valor;
+            }
+        }
+    }
+
+    fclose(extrato);
+    return saldo;
+}
+
+
+float VerificaSaldo_etherium(char* cpfDigitado) {
+    FILE *extrato;
+    char cpf[12];
+    char tipoTransacao;
+    char moeda;
+    float valor;
+    int dia, mes, ano, hora, minuto, segundo;
+
+    extrato = fopen("extrato.bin", "rb");
+
+    float saldo = 0.0;
+
+    while (fread(&tipoTransacao, sizeof(char), 1, extrato) == 1) {
+        
+        fread(&moeda, sizeof(char), 1, extrato);
+
+        fread(cpf, sizeof(char), 11, extrato);
+        cpf[11] = '\0';  
+
+        fread(&valor, sizeof(float), 1, extrato);
+
+        fread(&dia, sizeof(int), 1, extrato);
+        fread(&mes, sizeof(int), 1, extrato);
+        fread(&ano, sizeof(int), 1, extrato);
+        fread(&hora, sizeof(int), 1, extrato);
+        fread(&minuto, sizeof(int), 1, extrato);
+        fread(&segundo, sizeof(int), 1, extrato);
+
+        if (ValidaIgualdade(cpf, cpfDigitado) && moeda == 'E') {
+            if (tipoTransacao == 'D') {  
+                saldo = saldo + valor;
+            } else if (tipoTransacao == 'S') {  
+                saldo = saldo - valor;
+            }
+        }
+    }
+
+    fclose(extrato);
+    return saldo;
+}
+
+float VerificaSaldo_ripple(char* cpfDigitado) {
+    FILE *extrato;
+    char cpf[12];
+    char tipoTransacao;
+    char moeda;
+    float valor;
+    int dia, mes, ano, hora, minuto, segundo;
+
+    extrato = fopen("extrato.bin", "rb");
+
+    float saldo = 0.0;
+
+    while (fread(&tipoTransacao, sizeof(char), 1, extrato) == 1) {
+        
+        fread(&moeda, sizeof(char), 1, extrato);
+
+        fread(cpf, sizeof(char), 11, extrato);
+        cpf[11] = '\0';  
+
+        fread(&valor, sizeof(float), 1, extrato);
+
+        fread(&dia, sizeof(int), 1, extrato);
+        fread(&mes, sizeof(int), 1, extrato);
+        fread(&ano, sizeof(int), 1, extrato);
+        fread(&hora, sizeof(int), 1, extrato);
+        fread(&minuto, sizeof(int), 1, extrato);
+        fread(&segundo, sizeof(int), 1, extrato);
+
+        if (ValidaIgualdade(cpf, cpfDigitado) && moeda == 'R') {
+            if (tipoTransacao == 'D') {  
+                saldo = saldo + valor;
+            } else if (tipoTransacao == 'S') {  
+                saldo = saldo - valor;
+            }
+        }
+    }
+
+    fclose(extrato);
+    return saldo;
+}
+
+ char *ConsultarSaldo(char * cpfDigitado){
+    float saldo = VerificaSaldo(cpfDigitado); 
+    float saldo_bitcoin = VerificaSaldo_bitcoin(cpfDigitado); 
+    float saldo_etherium = VerificaSaldo_etherium(cpfDigitado); 
+    float saldo_ripple = VerificaSaldo_ripple(cpfDigitado); 
+    char* resultado = (char*)malloc(500 * sizeof(char));
+
+    sprintf(resultado,
+            "\nUsuario: %.11s\n"
+            "Seu saldo atual em Reais: %.2f\n"
+            "Seu saldo atual em Bitcoin: %.6f\n"
+            "Seu saldo atual em Etherium: %.6f\n"
+            "Seu saldo atual em Ripple: %.6f\n",
+            cpfDigitado, saldo, saldo_bitcoin, saldo_etherium, saldo_ripple);
+
+    return resultado;
+}
 
 // a mesma função do programa do investidor.
 float AtualizarCotacao(float valorAtual) {
@@ -157,19 +356,6 @@ int ExcluirCriptomoeda(const char* nomeCripto) {
     }
 }
 
-
-float ValidaIgualdade(const char* stringOne, const char* stringTwo) {
-    int i = 0;
-
-    while (stringOne[i] != '\0' && stringTwo[i] != '\0') {
-        if (stringOne[i] != stringTwo[i]) {
-            return 0;
-        }
-        i++;
-    }
-   return 1; 
-    
-}
 
 
 int VerificaCPF(const char *cpfDigitado) {
@@ -430,6 +616,8 @@ int main(void) {
     char nomeDigitado[50];
     char nomeCripto[50];
     float cotacaoInicial, taxaCompra, taxaVenda;
+    float saldo_bitcoin, saldo_etherium, saldo_ripple;
+    char* saldo;
 
     int logado = 1;  
 
@@ -566,7 +754,12 @@ int main(void) {
                 break;
 
             case 5:
-                printf("Consultando saldo de um investidor...");
+                printf("\nDigite o CPF do investidor para consultar o extrato: ");
+                scanf("%11s", cpfDigitado);
+                saldo = ConsultarSaldo(cpfDigitado);
+                printf("%s", saldo);
+                free(saldo);
+                break;
                 break;
             case 6:
                 printf("\nDigite o CPF do investidor para consultar o extrato: ");
