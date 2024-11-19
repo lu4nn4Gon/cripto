@@ -3,14 +3,17 @@
 O projeto Exchange de Criptomoedas tem o objetivo simular contas de usuários e suas movimentações financeiras envolvendo as Criptomoedas como Bitcoin, Etherium e Ripple. O programa realiza transações fictícias como por exemplo a compra, a venda, o depósito e o saque proporcionando dessa maneira uma vivência mais realista dessas operações.
 
 ## A forma de compilação e execução
-//conferir se a compilacao da parte do investidor esta certa
+Para executar o programa do Investidor:
+    1. Navegue até o diretório onde estão localizados os arquivos do projeto
+    2. Para compilar, realize o comando:  gcc investidor.c -o cripto -w
+    3. Após a compilação, execute o programa com o comando:  ./cripto  
 
-É primordial ter instalado o gcc para poder executar o programa.
-1. Navegue até o diretório onde estão localizados os arquivos do projeto
-2. Para compilar, realize o comando:  gcc investidor.c -o cripto
-3. Após a compilação, execute o programa com o comando:  ./cripto  
+Para executar o programa do Administrador:
+    1. Navegue até o diretório onde estão localizados os arquivos do projeto
+    2. Para compilar, realize o comando:  gcc administrador.c -o adm -w
+    3. Após a compilação, execute o programa com o comando:  ./adm
 
-//fazer a compilacao da parte do administrador
+É primordial ter instalado o gcc para poder executar ambos os programas.
 
 
 ## Uma breve explicação sobre a forma de uso do programa
